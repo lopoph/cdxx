@@ -697,53 +697,62 @@ function showCopySuccess() {
     let currentMusicIndex = -1;
 
 function playRandomMusic() {
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio = null;
-  }
-  
-  let newIndex;
-  do {
-    newIndex = Math.floor(Math.random() * musicLibrary.length);
-  } while (newIndex === currentMusicIndex && musicLibrary.length > 1);
-  
-  currentMusicIndex = newIndex;
-  const music = musicLibrary[currentMusicIndex];
-  
-  currentAudio = new Audio(music.url);
-  // currentAudio.loop = true;  // ❌ 删除这行（禁止单曲循环）
-  currentAudio.volume = 0.5;
-  
-  // ✅ 添加播放结束监听器
-  currentAudio.addEventListener('ended', function() {
-    // 保存当前歌曲索引
-    const currentSongIndex = currentMusicIndex;
+    if (isMusicPlaying) return; // 如果已经在播放，直接返回
     
-    // 随机选择下一首（确保不是当前歌曲）
-    let nextIndex;
-    do {
-      nextIndex = Math.floor(Math.random() * musicLibrary.length);
-    } while (nextIndex === currentSongIndex && musicLibrary.length > 1);
-    
-    // 播放下一首随机歌曲
-    currentMusicIndex = nextIndex;
-    const nextMusic = musicLibrary[currentMusicIndex];
-    
-    currentAudio.src = nextMusic.url;
-    currentAudio.play();
-  });
-    
-  currentAudio.play().then(() => {
-    isMusicPlaying = true;
-  }).catch(e => {
-    console.log("自动播放被阻止");
-  });
+    try {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+        
+        let newIndex;
+        do {
+            newIndex = Math.floor(Math.random() * musicLibrary.length);
+        } while (newIndex === currentMusicIndex && musicLibrary.length > 1);
+        
+        currentMusicIndex = newIndex;
+        const music = musicLibrary[currentMusicIndex];
+        
+        console.log('尝试播放音乐:', music.name);
+        
+        currentAudio = new Audio(music.url);
+        currentAudio.volume = 0.3; // 降低音量避免突兀
+        currentAudio.preload = 'auto';
+        
+        // 音乐播放成功
+        currentAudio.addEventListener('canplaythrough', function() {
+            const playPromise = currentAudio.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    isMusicPlaying = true;
+                    console.log('音乐播放成功:', music.name);
+                }).catch(error => {
+                    console.log('自动播放被阻止，需要用户交互');
+                });
+            }
+        });
+        
+        // 音乐加载失败
+        currentAudio.addEventListener('error', function(e) {
+            console.error('音乐加载失败:', e);
+            isMusicPlaying = false;
+        });
+        
+        // 音乐播放结束
+        currentAudio.addEventListener('ended', function() {
+            isMusicPlaying = false;
+            console.log('音乐播放结束');
+        });
+        
+    } catch (error) {
+        console.error('播放音乐出错:', error);
+        isMusicPlaying = false;
+    }
 }
 
 
-    window.addEventListener('load', function() {
-      setTimeout(playRandomMusic, 1000);
-    });
+    
 
     // 标签页切换变量
     let currentTabIndex = 0;
@@ -763,6 +772,7 @@ function playRandomMusic() {
         startX = e.touches[0].clientX;
         currentX = startX;
         isSwiping = true;
+        handleUserInteraction();
       });
       
       container.addEventListener('touchmove', function(e) {
@@ -772,6 +782,7 @@ function playRandomMusic() {
         // 阻止默认行为以避免页面滚动
         if (Math.abs(currentX - startX) > 10) {
           e.preventDefault();
+          handleUserInteraction();
         }
       });
       
@@ -800,6 +811,7 @@ function playRandomMusic() {
         startX = e.clientX;
         currentX = startX;
         isSwiping = true;
+        handleUserInteraction();
       });
       
       container.addEventListener('mousemove', function(e) {
@@ -1061,6 +1073,154 @@ if (newTabIndex < 0) {
     document.addEventListener('DOMContentLoaded', function() {
       initSwipe();
     });
+    
+    
+    
+// 添加全局用户交互监听
+let hasUserInteracted = false;
+// 可选：更精确的滑动检测（但不包括简单的上下左右滑动）
+let touchStartTime = 0;
+let touchStartX = 0;
+let touchStartY = 0;
+function handleUserInteraction() {
+    if (!hasUserInteracted && !isMusicPlaying) {
+        hasUserInteracted = true;
+        playRandomMusic();
+    }
+}
+
+// 监听主要用户交互
+document.addEventListener('click', handleUserInteraction);
+document.addEventListener('touchstart', handleUserInteraction);
+document.addEventListener('keydown', handleUserInteraction);
+document.addEventListener('mousedown', handleUserInteraction);
+document.addEventListener('input', handleUserInteraction);
+document.addEventListener('change', handleUserInteraction);
+
+// 特别为所有可交互元素添加监听
+document.querySelectorAll('button, .tab, input, select, label').forEach(element => {
+    element.addEventListener('click', handleUserInteraction);
+    element.addEventListener('touchstart', handleUserInteraction);
+    element.addEventListener('focus', handleUserInteraction);
+});
+
+
+contentContainer.addEventListener('touchstart', function(e) {
+    touchStartTime = Date.now();
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    handleUserInteraction();
+});
+
+contentContainer.addEventListener('touchmove', function(e) {
+    const touchX = e.touches[0].clientX;
+    const touchY = e.touches[0].clientY;
+    const deltaX = Math.abs(touchX - touchStartX);
+    const deltaY = Math.abs(touchY - touchStartY);
+    const elapsedTime = Date.now() - touchStartTime;
+    
+    // 只有在滑动距离较大且时间较短时才触发（避免误触）
+    if ((deltaX > 20 || deltaY > 20) && elapsedTime < 500) {
+        handleUserInteraction();
+    }
+});
+
+
+// 监听键盘输入
+document.addEventListener('keydown', handleUserInteraction);
+
+// 监听所有表单交互
+document.querySelectorAll('input, select, textarea').forEach(element => {
+    element.addEventListener('input', handleUserInteraction);
+    element.addEventListener('change', handleUserInteraction);
+    element.addEventListener('focus', handleUserInteraction);
+});
+
+// 监听标签页切换
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', handleUserInteraction);
+});
+
+// 监听按钮点击
+document.querySelectorAll('button').forEach(button => {
+    button.addEventListener('click', handleUserInteraction);
+});
+
+// 监听滑动内容区域
+const contentContainer = document.getElementById('content-container');
+if (contentContainer) {
+    contentContainer.addEventListener('touchstart', handleUserInteraction);
+    contentContainer.addEventListener('mousedown', handleUserInteraction);
+    contentContainer.addEventListener('click', handleUserInteraction);
+}
+
+// 监听所有输入区域
+const inputSections = document.querySelectorAll('.input-section');
+inputSections.forEach(section => {
+    section.addEventListener('touchstart', handleUserInteraction);
+    section.addEventListener('mousedown', handleUserInteraction);
+    section.addEventListener('click', handleUserInteraction);
+});
+
+// 监听所有结果区域
+const resultSections = document.querySelectorAll('.result-section');
+resultSections.forEach(section => {
+    section.addEventListener('touchstart', handleUserInteraction);
+    section.addEventListener('mousedown', handleUserInteraction);
+    section.addEventListener('click', handleUserInteraction);
+});
+
+// 监听所有加成区域
+const bonusContainers = document.querySelectorAll('.bonus-container');
+bonusContainers.forEach(container => {
+    container.addEventListener('touchstart', handleUserInteraction);
+    container.addEventListener('mousedown', handleUserInteraction);
+    container.addEventListener('click', handleUserInteraction);
+});
+
+// 监听所有输入框组
+const inputGroups = document.querySelectorAll('.input-group');
+inputGroups.forEach(group => {
+    group.addEventListener('touchstart', handleUserInteraction);
+    group.addEventListener('mousedown', handleUserInteraction);
+    group.addEventListener('click', handleUserInteraction);
+});
+
+// 监听所有输入行
+const inputRows = document.querySelectorAll('.input-row');
+inputRows.forEach(row => {
+    row.addEventListener('touchstart', handleUserInteraction);
+    row.addEventListener('mousedown', handleUserInteraction);
+    row.addEventListener('click', handleUserInteraction);
+});
+
+// 监听所有计算函数
+if (typeof calculatePower === 'function') {
+    const originalCalculatePower = calculatePower;
+    window.calculatePower = function() {
+        handleUserInteraction();
+        return originalCalculatePower();
+    };
+}
+
+if (typeof reverseCalculate === 'function') {
+    const originalReverseCalculate = reverseCalculate;
+    window.reverseCalculate = function() {
+        handleUserInteraction();
+        return originalReverseCalculate();
+    };
+}
+
+if (typeof calculateBath === 'function') {
+    const originalCalculateBath = calculateBath;
+    window.calculateBath = function() {
+        handleUserInteraction();
+        return originalCalculateBath();
+    };
+}
+
+console.log('音乐交互监听已启用 - 用户操作将触发音乐播放（包含内容区域滑动触发）');
+
   </script>
 </body>
 </html>
