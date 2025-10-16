@@ -305,7 +305,7 @@ h1 {
 
   
   <div class="qq-group-section">
-  <span>QQ群：371408377</span>
+  <span>有要改进的地方可进QQ群说：371408377</span>
   <button onclick="copyQQGroup()" class="copy-btn">复制</button>
 </div> 
 
@@ -628,8 +628,26 @@ h1 {
 
   <script>
   
+  
+  //提升数值的同步函数
  function syncBoostValues(tabType, inputType, value) {
-    if (value === '') return;
+    // 允许空值同步
+    if (value === '') {
+        if (tabType === 'power') {
+            if (inputType === 'life') {
+                document.getElementById('attack-boost').value = '';
+            } else if (inputType === 'attack') {
+                document.getElementById('life-boost').value = '';
+            }
+        } else if (tabType === 'base') {
+            if (inputType === 'life') {
+                document.getElementById('reverse-attack-boost').value = '';
+            } else if (inputType === 'attack') {
+                document.getElementById('reverse-life-boost').value = '';
+            }
+        }
+        return;
+    }
     
     const numericValue = parseFloat(value);
     if (isNaN(numericValue)) return;
@@ -648,6 +666,7 @@ h1 {
         }
     }
 }
+
 
   
   
