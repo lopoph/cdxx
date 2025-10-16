@@ -386,7 +386,9 @@ h1 {
             </div>
             <div class="bonus-input-group">
               <label class="bonus-label">提升：</label>
-              <input type="number" id="life-boost" step="0.01" placeholder="输入百分比" class="bonus-input">
+             <input type="number" id="life-boost" step="0.01" placeholder="输入百分比" class="bonus-input" oninput="syncBoostValues('power', 'life', this.value)">
+
+
             </div>
             <div class="bonus-input-group">
               <label class="bonus-label">增幅：</label>
@@ -402,7 +404,8 @@ h1 {
             </div>
             <div class="bonus-input-group">
               <label class="bonus-label">提升：</label>
-              <input type="number" id="attack-boost" step="0.01" placeholder="输入百分比" class="bonus-input">
+              <input type="number" id="attack-boost" step="0.01" placeholder="输入百分比" class="bonus-input" oninput="syncBoostValues('power', 'attack', this.value)">
+
             </div>
             <div class="bonus-input-group">
               <label class="bonus-label">增幅：</label>
@@ -458,7 +461,9 @@ h1 {
             </div>
             <div class="bonus-input-group">
               <label class="bonus-label">提升：</label>
-              <input type="number" id="reverse-life-boost" step="0.01" placeholder="输入百分比" class="bonus-input">
+              <input type="number" id="reverse-life-boost" step="0.01" placeholder="输入百分比" class="bonus-input" oninput="syncBoostValues('base', 'life', this.value)">
+
+
             </div>
             <div class="bonus-input-group">
               <label class="bonus-label">增幅：</label>
@@ -474,7 +479,9 @@ h1 {
             </div>
             <div class="bonus-input-group">
               <label class="bonus-label">提升：</label>
-              <input type="number" id="reverse-attack-boost" step="0.01" placeholder="输入百分比" class="bonus-input">
+              <input type="number" id="reverse-attack-boost" step="0.01" placeholder="输入百分比" class="bonus-input" oninput="syncBoostValues('base', 'attack', this.value)">
+
+
             </div>
             <div class="bonus-input-group">
               <label class="bonus-label">增幅：</label>
@@ -620,6 +627,30 @@ h1 {
   </div>
 
   <script>
+  
+ function syncBoostValues(tabType, inputType, value) {
+    if (value === '') return;
+    
+    const numericValue = parseFloat(value);
+    if (isNaN(numericValue)) return;
+    
+    if (tabType === 'power') {
+        if (inputType === 'life') {
+            document.getElementById('attack-boost').value = value;
+        } else if (inputType === 'attack') {
+            document.getElementById('life-boost').value = value;
+        }
+    } else if (tabType === 'base') {
+        if (inputType === 'life') {
+            document.getElementById('reverse-attack-boost').value = value;
+        } else if (inputType === 'attack') {
+            document.getElementById('reverse-life-boost').value = value;
+        }
+    }
+}
+
+  
+  
 function copyQQGroup() {
     const text = "371408377"; // 要复制的QQ群号
     
