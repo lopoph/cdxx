@@ -606,11 +606,140 @@
       min-width: 40px;
       white-space: nowrap;
     }
+    
+    /* 福袋悬停动画 */
+#lucky-bag:hover {
+  animation: bounce 0.5s infinite alternate;
+  text-shadow: 0 0 15px gold;
+}
+
+@keyframes bounce {
+  from { transform: rotate(-15deg); }
+  to { transform: rotate(15deg); }
+}
+
+/* 面板展开动画 */
+.stats-visible {
+  transform: translateX(0) !important;
+}
+
+/* 添加动画效果 */
+#giftIcon:hover {
+  animation: bounce 0.5s infinite alternate;
+}
+
+@keyframes bounce {
+  from { transform: rotate(-15deg) scale(1); }
+  to { transform: rotate(15deg) scale(1.1); }
+}
+
+#statsPanel {
+  transition: all 0.3s ease-out;
+  transform-origin: top left;
+}
+    
+    
+/* 礼物图标动画 */
+#giftIcon {
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+#giftIcon:hover {
+  animation: float 2s ease-in-out infinite;
+  transform: scale(1.1);
+  text-shadow: 0 0 20px rgba(255,215,0,1);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(5deg); }
+}
+
+/* 面板动画 */
+#statsPanel {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 按钮悬停效果 */
+#likeButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255,107,107,0.6);
+}
+
+#likeButton:active {
+  transform: translateY(0);
+}
+  
+    
+    
   </style>
 </head>
 
 <body>
 <!-- 音乐信息显示容器 - 添加到<body>标签内的任意位置 -->
+
+<!-- 礼物图标 -->
+<div id="giftIcon" style="position: fixed; top: 20px; left: 20px; z-index: 10000; cursor: pointer; font-size: 28px; transform: rotate(0deg); transition: all 0.5s ease; text-shadow: 0 0 10px rgba(255,215,0,0.8);">🎁</div>
+
+<!-- 统计面板 -->
+<div id="statsPanel" style="position: fixed; top: 70px; left: 20px; z-index: 9999; display: none; flex-direction: column; gap: 12px; background: linear-gradient(135deg, rgba(40,40,60,0.95) 0%, rgba(30,30,50,0.95) 100%); padding: 20px; border-radius: 16px; backdrop-filter: blur(12px); border: 1px solid rgba(255,215,0,0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.4); min-width: 200px;">
+
+  <!-- 面板标题 -->
+  <div style="text-align: center; color: #FFD700; font-size: 16px; font-weight: bold; margin-bottom: 10px; text-shadow: 0 0 8px rgba(255,215,0,0.5);">
+    ✨ 修仙统计 ✨
+  </div>
+
+  <!-- 访问量统计 -->
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: rgba(74, 111, 165, 0.3); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+    <div style="color: #E0E0E0; font-size: 14px;">
+      <span style="margin-right: 8px;">👁️</span>访问量
+    </div>
+    <div id="visitCount" style="color: #4FC3F7; font-weight: bold; font-size: 16px; text-shadow: 0 0 6px rgba(79,195,247,0.6);">
+      0
+    </div>
+  </div>
+
+  <!-- 点赞功能 -->
+  <div style="padding: 12px; background: rgba(255, 107, 107, 0.3); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+      <div style="color: #E0E0E0; font-size: 14px;">
+        <span style="margin-right: 8px;">👍</span>点赞数
+      </div>
+      <div id="likeCount" style="color: #FF6B6B; font-weight: bold; font-size: 16px; text-shadow: 0 0 6px rgba(255,107,107,0.6);">
+        0
+      </div>
+    </div>
+    
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button id="likeButton" onclick="addLike()" style="flex: 1; background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; box-shadow: 0 4px 12px rgba(255,107,107,0.4); transition: all 0.3s;">
+        💖 点赞 +1
+      </button>
+    </div>
+    
+    <div id="likeMessage" style="font-size: 12px; text-align: center; margin-top: 8px; height: 18px; opacity: 0; transition: opacity 0.3s;"></div>
+  </div>
+
+  <!-- 分隔线 -->
+  <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(255,215,0,0.3), transparent); margin: 5px 0;"></div>
+
+  <!-- 提示文字 -->
+  <div style="text-align: center; color: #888; font-size: 11px; font-style: italic;">
+    实验
+  </div>
+
+</div>
+
 
 
 
@@ -963,6 +1092,103 @@
   </div>
 
   <script>
+  
+  
+// ======== 礼物图标交互 ========
+const giftIcon = document.getElementById('giftIcon');
+const statsPanel = document.getElementById('statsPanel');
+let isPanelVisible = false;
+
+// 点击礼物图标
+giftIcon.addEventListener('click', function() {
+  isPanelVisible = !isPanelVisible;
+  
+  if (isPanelVisible) {
+    // 显示面板
+    statsPanel.style.display = 'flex';
+    giftIcon.style.transform = 'rotate(30deg)';
+    giftIcon.textContent = '🎉';
+    
+    // 首次展开时加载数据
+    if (!window.statsInitialized) {
+      initVisitCounter();
+      initLikeSystem();
+      window.statsInitialized = true;
+    }
+  } else {
+    // 隐藏面板
+    statsPanel.style.display = 'none';
+    giftIcon.style.transform = 'rotate(0deg)';
+    giftIcon.textContent = '🎁';
+  }
+});
+
+// ======== 访问量统计 ========
+async function initVisitCounter() {
+  try {
+    const response = await fetch('https://api.countapi.xyz/hit/lopoph/xiuxian-visits');
+    const data = await response.json();
+    document.getElementById('visitCount').textContent = data.value;
+  } catch (error) {
+    document.getElementById('visitCount').textContent = '0';
+  }
+}
+
+// ======== 点赞功能 ========
+async function initLikeSystem() {
+  try {
+    const response = await fetch('https://api.countapi.xyz/get/lopoph/xiuxian-likes');
+    const data = await response.json();
+    document.getElementById('likeCount').textContent = data.value || '0';
+    
+    const today = new Date().toDateString();
+    if (localStorage.getItem('xiuxianLiked_' + today)) {
+      disableLikeButton();
+    }
+  } catch (error) {
+    document.getElementById('likeCount').textContent = '0';
+  }
+}
+
+async function addLike() {
+  const today = new Date().toDateString();
+  if (localStorage.getItem('xiuxianLiked_' + today)) return;
+
+  const likeButton = document.getElementById('likeButton');
+  likeButton.disabled = true;
+  
+  try {
+    await fetch('https://api.countapi.xyz/hit/lopoph/xiuxian-likes');
+    const res = await fetch('https://api.countapi.xyz/get/lopoph/xiuxian-likes');
+    const data = await res.json();
+    
+    document.getElementById('likeCount').textContent = data.value;
+    localStorage.setItem('xiuxianLiked_' + today, 'true');
+    disableLikeButton();
+    showMessage('感谢支持！', '#4CAF50');
+  } catch (error) {
+    likeButton.disabled = false;
+    showMessage('点赞失败', '#FF5252');
+  }
+}
+
+function disableLikeButton() {
+  const btn = document.getElementById('likeButton');
+  btn.disabled = true;
+  btn.textContent = '已赞';
+  btn.style.opacity = '0.6';
+}
+
+function showMessage(text, color) {
+  const msg = document.getElementById('likeMessage');
+  msg.textContent = text;
+  msg.style.color = color;
+  msg.style.opacity = '1';
+  setTimeout(() => msg.style.opacity = '0', 2000);
+}
+
+  
+  
 // ===== 完整音乐播放器 =====
 const musicPlayer = (function() {
     // 音乐库
