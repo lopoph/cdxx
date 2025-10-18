@@ -1,0 +1,37 @@
+name: Update Counters
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # 每5分钟运行一次
+  workflow_dispatch:  # 允许手动触发
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  update-counters:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create counters directory
+        run: mkdir -p counters
+
+      - name: Create initial data file
+        run: |
+          cat > counters/data.json << 'EOF'
+          {
+            "visits": 1,
+            "likes": 0,
+            "updated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          }
+          EOF
+
+      - name: Commit and push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add counters/data.json
+          git commit -m "Initialize counters data" || exit 0
+          git push
