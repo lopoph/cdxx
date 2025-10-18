@@ -690,7 +690,7 @@
 <!-- 音乐信息显示容器 - 添加到<body>标签内的任意位置 -->
 
 <!-- 礼物图标 -->
-<div id="giftIcon" style="position: fixed; top: 20px; left: 20px; z-index: 10000; cursor: pointer; font-size: 28px; transform: rotate(0deg); transition: all 0.5s ease; text-shadow: 0 0 10px rgba(255,215,0,0.8);">🎁</div>
+<div id="giftIcon" style="position: fixed; top: 20px; left: 20px; z-index: 10000; cursor: pointer; font-size: 28px; transition: all 0.5s ease; text-shadow: 0 0 10px rgba(255,215,0,0.8);">🎁</div>
 
 <!-- 统计面板 -->
 <div id="statsPanel" style="position: fixed; top: 70px; left: 20px; z-index: 9999; display: none; flex-direction: column; gap: 12px; background: linear-gradient(135deg, rgba(40,40,60,0.95) 0%, rgba(30,30,50,0.95) 100%); padding: 20px; border-radius: 16px; backdrop-filter: blur(12px); border: 1px solid rgba(255,215,0,0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.4); min-width: 200px;">
@@ -706,7 +706,7 @@
       <span style="margin-right: 8px;">👁️</span>访问量
     </div>
     <div id="visitCount" style="color: #4FC3F7; font-weight: bold; font-size: 16px; text-shadow: 0 0 6px rgba(79,195,247,0.6);">
-      0
+      加载中...
     </div>
   </div>
 
@@ -717,7 +717,7 @@
         <span style="margin-right: 8px;">👍</span>点赞数
       </div>
       <div id="likeCount" style="color: #FF6B6B; font-weight: bold; font-size: 16px; text-shadow: 0 0 6px rgba(255,107,107,0.6);">
-        0
+        加载中...
       </div>
     </div>
     
@@ -730,15 +730,13 @@
     <div id="likeMessage" style="font-size: 12px; text-align: center; margin-top: 8px; height: 18px; opacity: 0; transition: opacity 0.3s;"></div>
   </div>
 
-  <!-- 分隔线 -->
-  <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(255,215,0,0.3), transparent); margin: 5px 0;"></div>
-
   <!-- 提示文字 -->
   <div style="text-align: center; color: #888; font-size: 11px; font-style: italic;">
-    实验
+    当前在实验
   </div>
 
 </div>
+
 
 
 
@@ -1094,98 +1092,219 @@
   <script>
   
   
-// ======== 礼物图标交互 ========
+// ==================== 跨设备实时统计功能 ====================
+// 使用 countapi.xyz 服务，真正实现跨设备同步
+
+class CrossDeviceCounter {
+    constructor(counterName, displayName) {
+        this.counterName = counterName;
+        this.displayName = displayName;
+        this.apiBase = 'https://api.countapi.xyz';
+    }
+
+    // 获取当前计数（跨设备实时）
+    async getCount() {
+        try {
+            const response = await fetch(`${this.apiBase}/get/lopoph/${this.counterName}`);
+            if (response.ok) {
+                const data = await response.json();
+                console.log(`${this.displayName}获取成功:`, data.value);
+                return data.value || 0;
+            }
+        } catch (error) {
+            console.log(`${this.displayName}API失败，使用本地存储`);
+        }
+        
+        // 降级方案：使用本地存储
+        return parseInt(localStorage.getItem(this.counterName)) || 0;
+    }
+
+    // 增加计数（跨设备实时）
+    async increment() {
+        let newCount;
+        
+        try {
+            // 优先使用跨设备API
+            const response = await fetch(`${this.apiBase}/hit/lopoph/${this.counterName}`);
+            if (response.ok) {
+                const data = await response.json();
+                newCount = data.value;
+                console.log(`${this.displayName}增加成功:`, newCount);
+            } else {
+                throw new Error('API请求失败');
+            }
+        } catch (error) {
+            // 降级到本地存储
+            console.log(`${this.displayName}使用本地存储`);
+            const current = parseInt(localStorage.getItem(this.counterName)) || 0;
+            newCount = current + 1;
+            localStorage.setItem(this.counterName, newCount.toString());
+        }
+        
+        return newCount;
+    }
+}
+
+// 创建计数器实例
+const visitCounter = new CrossDeviceCounter('xiuxian-visits', '访问量');
+const likeCounter = new CrossDeviceCounter('xiuxian-likes', '点赞数');
+
+// 礼物图标交互
 const giftIcon = document.getElementById('giftIcon');
 const statsPanel = document.getElementById('statsPanel');
 let isPanelVisible = false;
+let statsInitialized = false;
 
-// 点击礼物图标
-giftIcon.addEventListener('click', function() {
-  isPanelVisible = !isPanelVisible;
-  
-  if (isPanelVisible) {
-    // 显示面板
-    statsPanel.style.display = 'flex';
-    giftIcon.style.transform = 'rotate(30deg)';
-    giftIcon.textContent = '🎉';
+giftIcon.addEventListener('click', async function() {
+    isPanelVisible = !isPanelVisible;
     
-    // 首次展开时加载数据
-    if (!window.statsInitialized) {
-      initVisitCounter();
-      initLikeSystem();
-      window.statsInitialized = true;
+    if (isPanelVisible) {
+        // 显示面板
+        statsPanel.style.display = 'flex';
+        giftIcon.style.transform = 'rotate(30deg)';
+        giftIcon.textContent = '🎉';
+        
+        // 首次展开时加载数据
+        if (!statsInitialized) {
+            await loadStatistics();
+            statsInitialized = true;
+        }
+    } else {
+        // 隐藏面板
+        statsPanel.style.display = 'none';
+        giftIcon.style.transform = 'rotate(0deg)';
+        giftIcon.textContent = '🎁';
     }
-  } else {
-    // 隐藏面板
-    statsPanel.style.display = 'none';
-    giftIcon.style.transform = 'rotate(0deg)';
-    giftIcon.textContent = '🎁';
-  }
 });
 
-// ======== 访问量统计 ========
-async function initVisitCounter() {
-  try {
-    const response = await fetch('https://api.countapi.xyz/hit/lopoph/xiuxian-visits');
-    const data = await response.json();
-    document.getElementById('visitCount').textContent = data.value;
-  } catch (error) {
-    document.getElementById('visitCount').textContent = '0';
-  }
-}
-
-// ======== 点赞功能 ========
-async function initLikeSystem() {
-  try {
-    const response = await fetch('https://api.countapi.xyz/get/lopoph/xiuxian-likes');
-    const data = await response.json();
-    document.getElementById('likeCount').textContent = data.value || '0';
-    
-    const today = new Date().toDateString();
-    if (localStorage.getItem('xiuxianLiked_' + today)) {
-      disableLikeButton();
+// 加载统计数据
+async function loadStatistics() {
+    try {
+        // 显示加载状态
+        document.getElementById('visitCount').textContent = '加载中...';
+        document.getElementById('likeCount').textContent = '加载中...';
+        
+        // 并行获取访问量和点赞数
+        const [visits, likes] = await Promise.all([
+            visitCounter.getCount(),
+            likeCounter.getCount()
+        ]);
+        
+        // 更新显示
+        document.getElementById('visitCount').textContent = visits;
+        document.getElementById('likeCount').textContent = likes;
+        
+        // 检查今日是否已点赞
+        const today = new Date().toDateString();
+        if (localStorage.getItem('xiuxianLiked_' + today)) {
+            disableLikeButton();
+        }
+        
+        console.log('统计加载完成 - 访问量:', visits, '点赞数:', likes);
+        
+    } catch (error) {
+        console.error('加载统计失败:', error);
+        document.getElementById('visitCount').textContent = '0';
+        document.getElementById('likeCount').textContent = '0';
     }
-  } catch (error) {
-    document.getElementById('likeCount').textContent = '0';
-  }
 }
 
+// 点赞功能
 async function addLike() {
-  const today = new Date().toDateString();
-  if (localStorage.getItem('xiuxianLiked_' + today)) return;
-
-  const likeButton = document.getElementById('likeButton');
-  likeButton.disabled = true;
-  
-  try {
-    await fetch('https://api.countapi.xyz/hit/lopoph/xiuxian-likes');
-    const res = await fetch('https://api.countapi.xyz/get/lopoph/xiuxian-likes');
-    const data = await res.json();
+    const today = new Date().toDateString();
+    const likeButton = document.getElementById('likeButton');
     
-    document.getElementById('likeCount').textContent = data.value;
-    localStorage.setItem('xiuxianLiked_' + today, 'true');
-    disableLikeButton();
-    showMessage('感谢支持！', '#4CAF50');
-  } catch (error) {
-    likeButton.disabled = false;
-    showMessage('点赞失败', '#FF5252');
-  }
+    // 检查今天是否已经点过赞
+    if (localStorage.getItem('xiuxianLiked_' + today)) {
+        showMessage('今天已经点过赞啦！明天再来吧~', '#FF9800');
+        return;
+    }
+    
+    // 禁用按钮防止重复点击
+    likeButton.disabled = true;
+    likeButton.textContent = '点赞中...';
+    
+    try {
+        // 增加点赞数（跨设备同步）
+        const newLikeCount = await likeCounter.increment();
+        
+        // 更新显示
+        document.getElementById('likeCount').textContent = newLikeCount;
+        
+        // 标记今天已点赞
+        localStorage.setItem('xiuxianLiked_' + today, 'true');
+        disableLikeButton();
+        
+        // 显示成功消息
+        showMessage('感谢点赞！修仙之路因你更精彩~ 🎉', '#4CAF50');
+        
+        // 添加动画效果
+        likeButton.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+            likeButton.style.transform = 'scale(1)';
+        }, 300);
+        
+    } catch (error) {
+        console.error('点赞失败:', error);
+        likeButton.disabled = false;
+        likeButton.textContent = '+1';
+        showMessage('点赞失败，请刷新页面重试', '#FF5252');
+    }
 }
 
+// 辅助函数
 function disableLikeButton() {
-  const btn = document.getElementById('likeButton');
-  btn.disabled = true;
-  btn.textContent = '已赞';
-  btn.style.opacity = '0.6';
+    const likeButton = document.getElementById('likeButton');
+    likeButton.disabled = true;
+    likeButton.style.opacity = '0.6';
+    likeButton.textContent = '已赞';
 }
 
 function showMessage(text, color) {
-  const msg = document.getElementById('likeMessage');
-  msg.textContent = text;
-  msg.style.color = color;
-  msg.style.opacity = '1';
-  setTimeout(() => msg.style.opacity = '0', 2000);
+    const messageEl = document.getElementById('likeMessage');
+    messageEl.textContent = text;
+    messageEl.style.color = color;
+    messageEl.style.opacity = '1';
+    
+    setTimeout(() => {
+        messageEl.style.opacity = '0';
+    }, 3000);
 }
+
+// 页面加载时自动记录访问量
+document.addEventListener('DOMContentLoaded', async function() {
+    // 防刷新刷量：同会话只记录一次
+    const sessionKey = 'xiuxian_visit_session';
+    if (!sessionStorage.getItem(sessionKey)) {
+        sessionStorage.setItem(sessionKey, 'true');
+        
+        // 延迟记录访问量，避免影响页面加载
+        setTimeout(async () => {
+            try {
+                await visitCounter.increment();
+                console.log('访问量已记录');
+            } catch (error) {
+                console.log('访问量记录失败:', error);
+            }
+        }, 1000);
+    }
+    
+    // 添加礼物图标悬停效果
+    giftIcon.addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.1) rotate(-10deg)';
+        this.style.textShadow = '0 0 20px rgba(255,215,0,1)';
+    });
+    
+    giftIcon.addEventListener('mouseleave', function() {
+        if (!isPanelVisible) {
+            this.style.transform = 'scale(1) rotate(0deg)';
+            this.style.textShadow = '0 0 10px rgba(255,215,0,0.8)';
+        }
+    });
+});
+
+// ==================== 统计功能结束 ====================
+
 
   
   
