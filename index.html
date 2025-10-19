@@ -612,69 +612,244 @@
     
     
     
- #giftIcon {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 10000;
-  cursor: pointer;
-  font-size: 32px; /* 稍微调大字体 */
-  transition: all 0.5s ease;
-  
-  /* 移除背景色和边框，让图标本身发光 */
-  background: none;
-  border: none;
-  width: auto;
-  height: auto;
-  border-radius: 0;
-  box-shadow: none;
-  
-  /* 添加发光效果 */
-  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
-  text-shadow: 
-    0 0 20px rgba(255, 215, 0, 0.9),
-    0 0 40px rgba(255, 215, 0, 0.6),
-    0 0 60px rgba(255, 215, 0, 0.3);
+
+/* 统计面板容器 */
+.stats-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 10000;
 }
 
-/* 鼠标悬停时增强发光效果 */
-#giftIcon:hover {
-  filter: drop-shadow(0 0 15px rgba(255, 215, 0, 1));
-  text-shadow: 
-    0 0 25px rgba(255, 215, 0, 1),
-    0 0 50px rgba(255, 215, 0, 0.8),
-    0 0 75px rgba(255, 215, 0, 0.5);
-  transform: scale(1.1);
+/* 金光闪烁的图标 */
+.stats-toggle {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #ffd700, #ffed4e, #ffd700);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: pointer;
+    border: 3px solid #ff6b35;
+    box-shadow: 
+        0 0 20px #ffd700,
+        0 0 40px #ff9500,
+        0 0 60px #ff4d00,
+        inset 0 0 20px rgba(255, 215, 0, 0.4);
+    animation: goldenGlow 2s ease-in-out infinite alternate;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    user-select: none;
 }
 
-/* 面板展开时的发光效果 */
-#giftIcon.active {
-  filter: drop-shadow(0 0 20px rgba(255, 100, 100, 1));
-  text-shadow: 
-    0 0 30px rgba(255, 100, 100, 1),
-    0 0 60px rgba(255, 100, 100, 0.8),
-    0 0 90px rgba(255, 100, 100, 0.5);
+.stats-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 
+        0 0 30px #ffd700,
+        0 0 60px #ff9500,
+        0 0 90px #ff4d00;
 }
 
+.stats-toggle.active {
+    background: linear-gradient(135deg, #ff6b6b, #ff8e8e, #ff6b6b);
+    border-color: #4a4a4a;
+    box-shadow: 
+        0 0 20px #ff6b6b,
+        0 0 40px #ff5252,
+        0 0 60px #ff0000;
+    animation: clownDance 1.5s ease-in-out infinite alternate;
+}
 
-    /* 统计面板样式 */
-    #statsPanel {
-      position: fixed;
-      top: 80px;
-      left: 20px;
-      z-index: 9999;
-      display: none;
-      flex-direction: column;
-      gap: 12px;
-      background: linear-gradient(135deg, rgba(40,40,60,0.95) 0%, rgba(30,30,50,0.95) 100%);
-      padding: 20px;
-      border-radius: 16px;
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,215,0,0.3);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-      min-width: 220px;
-      font-family: 'Microsoft YaHei', Arial, sans-serif;
+/* 金光晃动动画 */
+@keyframes goldenGlow {
+    0% {
+        transform: translateX(-5px) rotate(-5deg);
+        box-shadow: 
+            0 0 20px #ffd700,
+            0 0 40px #ff9500,
+            0 0 60px #ff4d00;
     }
+    50% {
+        transform: translateX(0) rotate(0deg);
+        box-shadow: 
+            0 0 30px #ffd700,
+            0 0 60px #ff9500,
+            0 0 90px #ff4d00;
+    }
+    100% {
+        transform: translateX(5px) rotate(5deg);
+        box-shadow: 
+            0 0 20px #ffd700,
+            0 0 40px #ff9500,
+            0 0 60px #ff4d00;
+    }
+}
+
+/* 小丑晃动动画 */
+@keyframes clownDance {
+    0% {
+        transform: translateX(-8px) rotate(-8deg) scale(1.1);
+    }
+    50% {
+        transform: translateX(0) rotate(0deg) scale(1);
+    }
+    100% {
+        transform: translateX(8px) rotate(8deg) scale(1.1);
+    }
+}
+
+/* 统计面板 */
+.stats-panel {
+    position: absolute;
+    top: 70px;
+    left: 60px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    border: 2px solid #ffd700;
+    backdrop-filter: blur(10px);
+    min-width: 250px;
+    font-family: 'Microsoft YaHei', Arial, sans-serif;
+    opacity: 0;
+    transform: translateY(-20px) scale(0.9);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    pointer-events: none;
+}
+
+.stats-panel.active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: all;
+}
+
+.stats-header {
+    text-align: center;
+    color: #FFD700;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+    background: linear-gradient(90deg, transparent, rgba(255,215,0,0.1), transparent);
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    margin: 8px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    color: white;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+.stat-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+    border-color: rgba(255, 215, 0, 0.3);
+}
+
+.stat-label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    gap: 10px;
+}
+
+.stat-value {
+    color: #4FC3F7;
+    font-weight: bold;
+    font-size: 16px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px 12px;
+    border-radius: 8px;
+    min-width: 50px;
+    text-align: center;
+    border: 1px solid rgba(79, 195, 247, 0.3);
+}
+
+.like-section {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid rgba(255, 215, 0, 0.2);
+}
+
+.like-button {
+    width: 100%;
+    background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);
+    border: none;
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.like-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+}
+
+.like-button:active {
+    transform: translateY(0);
+}
+
+.like-button:disabled {
+    opacity: 0.7;
+    transform: none;
+    cursor: not-allowed;
+}
+
+.like-message {
+    font-size: 12px;
+    text-align: center;
+    margin-top: 10px;
+    height: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.stats-loading .stat-value {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+    100% { opacity: 0.6; transform: scale(1); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .stats-container {
+        top: 10px;
+        left: 10px;
+    }
+    
+    .stats-toggle {
+        width: 50px;
+        height: 50px;
+        font-size: 28px;
+    }
+    
+    .stats-panel {
+        min-width: 220px;
+        left: -80px;
+    }
+}
+
     
   </style>
 </head>
@@ -682,51 +857,42 @@
 <body>
 <!-- 音乐信息显示容器 - 添加到<body>标签内的任意位置 -->
 
-<!-- 礼物图标 -->
-  <div id="giftIcon">🎁</div>
-
-  <!-- 统计面板 -->
-  <div id="statsPanel">
-    <!-- 面板标题 -->
-    <div style="text-align: center; color: #FFD700; font-size: 16px; font-weight: bold; margin-bottom: 10px; text-shadow: 0 0 8px rgba(255,215,0,0.5);">
-      ✨ 修仙统计 ✨
+<!-- 统计面板容器 -->
+<div class="stats-container" id="statsContainer">
+    <!-- 金光闪闪的切换按钮 -->
+    <div class="stats-toggle" id="statsToggle" title="点击查看修仙统计">
+        🔞
     </div>
-
-    <!-- 访问量统计 -->
-    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: rgba(74, 111, 165, 0.3); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
-      <div style="color: #E0E0E0; font-size: 14px;">
-        <span style="margin-right: 8px;">👁️</span>访问量
-      </div>
-      <div id="visitCount" style="color: #4FC3F7; font-weight: bold; font-size: 16px; text-shadow: 0 0 6px rgba(79,195,247,0.6);">
-        加载中...
-      </div>
-    </div>
-
-    <!-- 点赞功能 -->
-    <div style="padding: 12px; background: rgba(255, 107, 107, 0.3); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-        <div style="color: #E0E0E0; font-size: 14px;">
-          <span style="margin-right: 8px;">👍</span>点赞数
+    
+    <!-- 统计面板 -->
+    <div class="stats-panel" id="statsPanel">
+        <div class="stats-header">
+            ✨ 修仙统计 ✨
         </div>
-        <div id="likeCount" style="color: #FF6B6B; font-weight: bold; font-size: 16px; text-shadow: 0 0 6px rgba(255,107,107,0.6);">
-          加载中...
+        
+        <div class="stat-item">
+            <div class="stat-label">
+                <span>👁️</span>访问量
+            </div>
+            <div class="stat-value" id="visitCount">0</div>
         </div>
-      </div>
-      
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <button id="likeButton" style="flex: 1; background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; box-shadow: 0 4px 12px rgba(255,107,107,0.4); transition: all 0.3s;">
-          💖 点赞 +1
-        </button>
-      </div>
-      
-      <div id="likeMessage" style="font-size: 12px; text-align: center; margin-top: 8px; height: 18px; opacity: 0; transition: opacity 0.3s;"></div>
+        
+        <div class="stat-item">
+            <div class="stat-label">
+                <span>👍</span>点赞数
+            </div>
+            <div class="stat-value" id="likeCount">0</div>
+        </div>
+        
+        <div class="like-section">
+            <button class="like-button" id="likeButton">
+                💖 点赞 +1
+            </button>
+            <div class="like-message" id="likeMessage"></div>
+        </div>
     </div>
+</div>
 
-    <!-- 提示文字 -->
-    <div style="text-align: center; color: #888; font-size: 11px; font-style: italic;">
-      当前测试中
-    </div>
-  </div>
 
 
 
@@ -1082,83 +1248,257 @@
   <script>
   
   
-// ==================== 绝对不报错的统计代码 ====================
-function initSafeStats() {
-    console.log('初始化安全统计功能...');
-    
-    // 确保元素存在
-    const giftIcon = document.getElementById('giftIcon');
-    const statsPanel = document.getElementById('statsPanel');
-    
-    if (!giftIcon || !statsPanel) {
-        console.log('统计元素未找到，3秒后重试...');
-        setTimeout(initSafeStats, 3000);
-        return;
-    }
-    
-    let panelVisible = false;
-    
-    // 礼物图标点击
-    giftIcon.onclick = function() {
-        panelVisible = !panelVisible;
-        statsPanel.style.display = panelVisible ? 'flex' : 'none';
-        giftIcon.textContent = panelVisible ? '🎉' : '🎁';
+
+
+// 统计系统配置
+const STATS_CONFIG = {
+    repoOwner: 'lopoph',
+    repoName: 'cdxx',
+    dataUrl: 'https://raw.githubusercontent.com/lopoph/cdxx/main/data.json'
+};
+
+// 统计面板控制功能
+function initStatsPanel() {
+    const toggle = document.getElementById('statsToggle');
+    const panel = document.getElementById('statsPanel');
+    let isPanelOpen = false;
+
+    // 点击切换按钮
+    toggle.addEventListener('click', function() {
+        isPanelOpen = !isPanelOpen;
         
-        if (panelVisible) {
-            loadSafeData();
-        }
-    };
-    
-    // 点赞按钮
-    const likeBtn = document.getElementById('likeButton');
-    if (likeBtn) {
-        likeBtn.onclick = function() {
-            const today = new Date().toDateString();
-            if (localStorage.getItem('localLiked_' + today)) {
-                alert('今天已经点过赞啦！');
-                return;
-            }
+        if (isPanelOpen) {
+            // 打开面板：🔞 → 🤡
+            toggle.innerHTML = '🤡';
+            toggle.classList.add('active');
+            panel.classList.add('active');
             
-            // 本地点赞
-            const current = parseInt(document.getElementById('likeCount').textContent) || 0;
-            document.getElementById('likeCount').textContent = current + 1;
-            localStorage.setItem('localLiked_' + today, 'true');
-            likeBtn.disabled = true;
-            likeBtn.textContent = '已赞';
-            alert('点赞成功！');
-        };
-    }
-    
-    // 加载数据
-    loadSafeData();
+            // 面板打开时加载数据
+            loadStats();
+            
+            console.log('📊 统计面板已打开');
+        } else {
+            // 关闭面板：🤡 → 🔞
+            toggle.innerHTML = '🔞';
+            toggle.classList.remove('active');
+            panel.classList.remove('active');
+            
+            console.log('📊 统计面板已关闭');
+        }
+    });
+
+    // 点击面板外部关闭面板
+    document.addEventListener('click', function(event) {
+        if (isPanelOpen && !document.getElementById('statsContainer').contains(event.target)) {
+            isPanelOpen = false;
+            toggle.innerHTML = '🔞';
+            toggle.classList.remove('active');
+            panel.classList.remove('active');
+        }
+    });
+
+    // 阻止面板内部的点击事件冒泡
+    panel.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
+
+    console.log('🎮 统计面板控制初始化完成');
 }
 
-// 安全加载数据（绝对不报错）
+// 触发计数增加
+async function triggerCount(type) {
+    try {
+        console.log(`📊 触发${type}计数...`);
+        
+        const response = await fetch(`https://api.github.com/repos/${STATS_CONFIG.repoOwner}/${STATS_CONFIG.repoName}/dispatches`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                event_type: 'increment_counter',
+                client_payload: {
+                    type: type,
+                    timestamp: new Date().toISOString(),
+                    page: window.location.href,
+                    referrer: document.referrer,
+                    userAgent: navigator.userAgent
+                }
+            })
+        });
+        
+        if (response.status === 204) {
+            console.log(`✅ ${type}计数触发成功`);
+            return true;
+        } else {
+            console.warn('⚠️ GitHub API限制，使用本地计数');
+            handleLocalCount(type);
+            return false;
+        }
+    } catch (error) {
+        console.warn('🔴 API调用失败，使用本地计数');
+        handleLocalCount(type);
+        return false;
+    }
+}
+
+// 本地计数备用方案
+function handleLocalCount(type) {
+    const today = new Date().toDateString();
+    const key = `local_${type}_${today}`;
+    const current = parseInt(localStorage.getItem(key)) || 0;
+    localStorage.setItem(key, current + 1);
+    console.log(`📱 本地${type}计数: ${current + 1}`);
+    return true;
+}
+
+// 加载并显示统计数据
 async function loadStats() {
     try {
-        // 使用你截图中的确切路径
-        const response = await fetch('https://lopoph.github.io/cdxx/data.json?t=' + Date.now());
+        console.log('🔄 加载统计数据...');
+        
+        // 添加时间戳避免缓存
+        const response = await fetch(`${STATS_CONFIG.dataUrl}?t=${Date.now()}`);
+        
+        if (!response.ok) throw new Error('网络响应不正常');
+        
         const data = await response.json();
+        console.log('📈 远程数据:', data);
+        
+        // 获取本地计数
+        const today = new Date().toDateString();
+        const localViews = parseInt(localStorage.getItem(`local_view_${today}`)) || 0;
+        const localLikes = parseInt(localStorage.getItem(`local_like_${today}`)) || 0;
+        
+        // 合并远程和本地计数
+        const totalViews = (data.views || 0) + localViews;
+        const totalLikes = (data.likes || 0) + localLikes;
         
         // 更新页面显示
-        document.getElementById('visitCount').textContent = data.visits;
-        document.getElementById('likeCount').textContent = data.likes;
-        
-        console.log('数据加载成功！', data);
+        updateStatsDisplay(totalViews, totalLikes);
         
     } catch (error) {
-        console.log('使用备用数据');
-        document.getElementById('visitCount').textContent = '1';
-        document.getElementById('likeCount').textContent = '0';
+        console.warn('📱 使用本地备用数据');
+        showLocalStats();
     }
 }
 
-// 页面加载后初始化
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSafeStats);
-} else {
-    initSafeStats();
+// 更新页面显示
+function updateStatsDisplay(views, likes) {
+    const visitsElement = document.getElementById('visitCount');
+    const likesElement = document.getElementById('likeCount');
+    
+    if (visitsElement) {
+        visitsElement.textContent = formatNumber(views);
+        visitsElement.style.animation = 'none';
+        setTimeout(() => {
+            visitsElement.style.animation = 'pulse 0.5s ease';
+        }, 10);
+    }
+    
+    if (likesElement) {
+        likesElement.textContent = formatNumber(likes);
+        likesElement.style.animation = 'none';
+        setTimeout(() => {
+            likesElement.style.animation = 'pulse 0.5s ease';
+        }, 10);
+    }
 }
+
+// 数字格式化
+function formatNumber(num) {
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+}
+
+// 显示纯本地统计
+function showLocalStats() {
+    const today = new Date().toDateString();
+    const localViews = parseInt(localStorage.getItem(`local_view_${today}`)) || 0;
+    const localLikes = parseInt(localStorage.getItem(`local_like_${today}`)) || 0;
+    
+    updateStatsDisplay(localViews, localLikes);
+}
+
+// 设置点赞按钮
+function setupLikeButton() {
+    const likeButton = document.getElementById('likeButton');
+    const likeMessage = document.getElementById('likeMessage');
+    
+    if (likeButton) {
+        likeButton.addEventListener('click', async function() {
+            // 禁用按钮防止重复点击
+            likeButton.disabled = true;
+            likeButton.textContent = '💝 点赞中...';
+            
+            // 触发点赞计数
+            const success = await triggerCount('like');
+            
+            // 显示点赞反馈
+            if (likeMessage) {
+                if (success) {
+                    likeMessage.textContent = '👍 感谢道友点赞！功德+1';
+                    likeMessage.style.color = '#4CAF50';
+                } else {
+                    likeMessage.textContent = '⚠️ 网络波动，已记录本地';
+                    likeMessage.style.color = '#FF9800';
+                }
+                likeMessage.style.opacity = '1';
+                
+                setTimeout(() => {
+                    likeMessage.style.opacity = '0';
+                }, 3000);
+            }
+            
+            // 更新显示
+            setTimeout(() => {
+                loadStats();
+                likeButton.disabled = false;
+                likeButton.textContent = '💖 点赞 +1';
+            }, 2000);
+        });
+    }
+}
+
+// 初始化统计系统
+function initStatsSystem() {
+    console.log('🚀 初始化修仙统计系统...');
+    
+    // 初始化面板控制
+    initStatsPanel();
+    
+    // 页面加载时触发访问计数（但不显示面板）
+    setTimeout(() => {
+        triggerCount('view');
+    }, 2000);
+    
+    // 加载统计数据（但不显示）
+    loadStats();
+    
+    // 设置定时更新（每30秒更新一次）
+    setInterval(loadStats, 30000);
+    
+    // 设置点赞按钮事件
+    setupLikeButton();
+    
+    console.log('✅ 统计系统初始化完成');
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 延迟初始化，确保页面完全加载
+    setTimeout(initStatsSystem, 1000);
+    
+    // 添加控制台欢迎信息
+    console.log('🌌 欢迎来到修仙计算器！');
+    console.log('🎯 点击左上角金光图标查看统计');
+    console.log('🚀 GitHub Actions驱动，实时统计访问量');
+});
 
 
   
