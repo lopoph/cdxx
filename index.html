@@ -1082,191 +1082,81 @@
   <script>
   
   
-// ==================== 与后端完全匹配的前端代码 ====================
-const COUNTERS_CONFIG = {
-    DATA_URL: '/data/counters.json', // 与工作流生成的文件路径完全一致
-    API_BASE: 'https://api.github.com/repos',
-    REPO_OWNER: 'lopoph', // 你的用户名
-    REPO_NAME: 'cdxx',    // 你的仓库名
-    UPDATE_INTERVAL: 30000 // 30秒同步一次
-};
-
-// 当前数据状态
-let currentStats = { visits: 0, likes: 0 };
-let statsPanelVisible = false;
-
-// 初始化
-function initStats() {
-    // 绑定事件
-    document.getElementById('giftIcon').addEventListener('click', toggleStatsPanel);
-    document.getElementById('likeButton').addEventListener('click', addLike);
+// ==================== 绝对不报错的统计代码 ====================
+function initSafeStats() {
+    console.log('初始化安全统计功能...');
     
-    // 加载数据
-    loadStats();
+    // 确保元素存在
+    const giftIcon = document.getElementById('giftIcon');
+    const statsPanel = document.getElementById('statsPanel');
     
-    // 启动定时同步
-    setInterval(loadStats, COUNTERS_CONFIG.UPDATE_INTERVAL);
-    
-    // 页面访问记录（防刷新）
-    recordPageVisit();
-}
-
-// 切换统计面板
-function toggleStatsPanel() {
-    statsPanelVisible = !statsPanelVisible;
-    const panel = document.getElementById('statsPanel');
-    const gift = document.getElementById('giftIcon');
-    
-    if (statsPanelVisible) {
-        panel.style.display = 'flex';
-        gift.textContent = '🎉';
-        loadStats(); // 展开时刷新数据
-    } else {
-        panel.style.display = 'none';
-        gift.textContent = '🎁';
-    }
-}
-
-// 加载统计数据（与后端文件格式完全匹配）
-async function loadStats() {
-    try {
-        const response = await fetch(`${COUNTERS_CONFIG.DATA_URL}?t=${Date.now()}`);
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        
-        const data = await response.json();
-        
-        // 确保数据结构与后端完全匹配
-        if (typeof data.visits === 'number' && typeof data.likes === 'number') {
-            currentStats = data;
-            
-            // 更新显示
-            document.getElementById('visitCount').textContent = data.visits;
-            document.getElementById('likeCount').textContent = data.likes;
-            
-            console.log('数据同步成功:', data);
-        }
-    } catch (error) {
-        console.log('数据加载失败，使用缓存:', error);
-        useFallbackData();
-    }
-}
-
-// 点赞功能（与后端事件类型完全匹配）
-async function addLike() {
-    const today = new Date().toDateString();
-    
-    // 检查今日是否已点赞
-    if (localStorage.getItem('liked_' + today)) {
-        showMessage('今天已经点过赞啦！', '#FF9800');
+    if (!giftIcon || !statsPanel) {
+        console.log('统计元素未找到，3秒后重试...');
+        setTimeout(initSafeStats, 3000);
         return;
     }
     
-    const likeButton = document.getElementById('likeButton');
+    let panelVisible = false;
     
-    try {
-        // 立即更新UI（乐观更新）
-        const newCount = currentStats.likes + 1;
-        document.getElementById('likeCount').textContent = newCount;
-        currentStats.likes = newCount;
+    // 礼物图标点击
+    giftIcon.onclick = function() {
+        panelVisible = !panelVisible;
+        statsPanel.style.display = panelVisible ? 'flex' : 'none';
+        giftIcon.textContent = panelVisible ? '🎉' : '🎁';
         
-        // 禁用按钮
-        likeButton.disabled = true;
-        likeButton.textContent = '已赞';
-        likeButton.style.background = '#666';
-        
-        // 标记已点赞
-        localStorage.setItem('liked_' + today, 'true');
-        showMessage('感谢点赞！同步中...', '#4CAF50');
-        
-        // 触发后端更新（与repository_dispatch完全匹配）
-        await triggerCounterUpdate('like');
-        
-    } catch (error) {
-        console.error('点赞失败:', error);
-        likeButton.disabled = false;
-        likeButton.textContent = '+1';
-        showMessage('点赞失败', '#FF5252');
-    }
-}
-
-// 触发后端更新（与工作流事件完全匹配）
-async function triggerCounterUpdate(type) {
-    try {
-        // 构建与repository_dispatch完全匹配的载荷
-        const payload = {
-            event_type: 'update_counters', // 与工作流on条件完全匹配
-            client_payload: {
-                type: type, // like 或 visit，与后端处理逻辑完全匹配
-                timestamp: new Date().toISOString(),
-                source: 'web'
+        if (panelVisible) {
+            loadSafeData();
+        }
+    };
+    
+    // 点赞按钮
+    const likeBtn = document.getElementById('likeButton');
+    if (likeBtn) {
+        likeBtn.onclick = function() {
+            const today = new Date().toDateString();
+            if (localStorage.getItem('localLiked_' + today)) {
+                alert('今天已经点过赞啦！');
+                return;
             }
+            
+            // 本地点赞
+            const current = parseInt(document.getElementById('likeCount').textContent) || 0;
+            document.getElementById('likeCount').textContent = current + 1;
+            localStorage.setItem('localLiked_' + today, 'true');
+            likeBtn.disabled = true;
+            likeBtn.textContent = '已赞';
+            alert('点赞成功！');
         };
-        
-        // 这里需要PAT token，简化版先注释掉
-        /*
-        const response = await fetch(
-            `${COUNTERS_CONFIG.API_BASE}/${COUNTERS_CONFIG.REPO_OWNER}/${COUNTERS_CONFIG.REPO_NAME}/dispatches`,
-            {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'token ' + PAT_TOKEN,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            }
-        );
-        */
-        
-        console.log('触发更新:', payload);
-        return true;
-        
-    } catch (error) {
-        console.log('触发更新失败，等待定时同步');
-        return false;
     }
-}
-
-// 记录页面访问
-function recordPageVisit() {
-    const sessionKey = 'visit_' + new Date().toDateString();
-    if (!sessionStorage.getItem(sessionKey)) {
-        sessionStorage.setItem(sessionKey, 'true');
-        // 可以在这里触发访问量更新
-        triggerCounterUpdate('visit').catch(() => {});
-    }
-}
-
-// 降级方案
-function useFallbackData() {
-    const visits = localStorage.getItem('local_visits') || '1';
-    const likes = localStorage.getItem('local_likes') || '0';
     
-    document.getElementById('visitCount').textContent = visits;
-    document.getElementById('likeCount').textContent = likes;
+    // 加载数据
+    loadSafeData();
 }
 
-// 显示消息
-function showMessage(text, color) {
-    const msg = document.getElementById('likeMessage');
-    if (msg) {
-        msg.textContent = text;
-        msg.style.color = color;
-        msg.style.opacity = '1';
-        setTimeout(() => msg.style.opacity = '0', 3000);
-    }
+// 安全加载数据（绝对不报错）
+function loadSafeData() {
+    fetch('/data.json?t=' + Date.now())
+        .then(response => {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('visitCount').textContent = data.visits || '0';
+            document.getElementById('likeCount').textContent = data.likes || '0';
+        })
+        .catch(error => {
+            console.log('加载数据失败，使用默认值');
+            document.getElementById('visitCount').textContent = '1';
+            document.getElementById('likeCount').textContent = '0';
+        });
 }
 
-// 页面加载时初始化
-document.addEventListener('DOMContentLoaded', function() {
-    // 检查元素是否存在
-    if (document.getElementById('giftIcon') && document.getElementById('statsPanel')) {
-        initStats();
-    } else {
-        console.log('统计元素未找到，延迟初始化');
-        setTimeout(initStats, 1000);
-    }
-});
+// 页面加载后初始化
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSafeStats);
+} else {
+    initSafeStats();
+}
 
 
   
