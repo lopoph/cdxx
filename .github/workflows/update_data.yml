@@ -1,9 +1,23 @@
 name: 🎯 修仙统计更新
 
 on:
-workflow_dispatch:
   repository_dispatch:
     types: [increment_counter]
+  workflow_dispatch:  # 添加手动触发
+    inputs:
+      test_type:
+        description: '测试类型'
+        required: true
+        default: 'view'
+        type: choice
+        options:
+        - view
+        - like
+      test_count:
+        description: '测试数量'
+        required: false
+        default: '1'
+        type: string
 
 permissions:
   contents: write
@@ -30,16 +44,32 @@ jobs:
             likes=0
           fi
           
-          # 获取事件类型并更新计数
-          EVENT_TYPE="${{ github.event.client_payload.type }}"
-          echo "📝 事件类型: $EVENT_TYPE"
-          
-          if [ "$EVENT_TYPE" = "view" ]; then
-            views=$((views + 1))
-            echo "👁️ 访问量增加到: $views"
-          elif [ "$EVENT_TYPE" = "like" ]; then
-            likes=$((likes + 1))
-            echo "👍 点赞数增加到: $likes"
+          # 判断触发方式并更新计数
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            # 手动触发测试
+            TEST_TYPE="${{ github.event.inputs.test_type }}"
+            TEST_COUNT="${{ github.event.inputs.test_count }}"
+            echo "🧪 手动测试: 类型=$TEST_TYPE, 数量=$TEST_COUNT"
+            
+            if [ "$TEST_TYPE" = "view" ]; then
+              views=$((views + TEST_COUNT))
+              echo "👁️ 访问量增加 $TEST_COUNT: $views"
+            elif [ "$TEST_TYPE" = "like" ]; then
+              likes=$((likes + TEST_COUNT))
+              echo "👍 点赞数增加 $TEST_COUNT: $likes"
+            fi
+          else
+            # 正常API触发
+            EVENT_TYPE="${{ github.event.client_payload.type }}"
+            echo "📝 事件类型: $EVENT_TYPE"
+            
+            if [ "$EVENT_TYPE" = "view" ]; then
+              views=$((views + 1))
+              echo "👁️ 访问量增加到: $views"
+            elif [ "$EVENT_TYPE" = "like" ]; then
+              likes=$((likes + 1))
+              echo "👍 点赞数增加到: $likes"
+            fi
           fi
           
           # 更新数据文件
@@ -48,7 +78,8 @@ jobs:
             \"views\": $views,
             \"likes\": $likes,
             \"last_updated\": \"$(date -Iseconds)\",
-            \"last_action\": \"$EVENT_TYPE\"
+            \"last_action\": \"${{ github.event_name }}\",
+            \"triggered_by\": \"${{ github.actor }}\"
           }" > data.json
           
           echo "✅ 更新完成:"
@@ -59,7 +90,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data.json
-          git commit -m "📈 自动更新: ${{ github.event.client_payload.type }}计数 [skip ci]"
+          git commit -m "📈 统计更新: ${{ github.event_name }} [skip ci]"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -69,3 +100,4 @@ jobs:
           echo "✅ 统计更新完成！"
           echo "📊 最新数据:"
           cat data.json
+          echo "🕒 更新时间: $(date)"
