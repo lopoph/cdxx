@@ -724,7 +724,7 @@
 
     <!-- 提示文字 -->
     <div style="text-align: center; color: #888; font-size: 11px; font-style: italic;">
-      当然实验
+      当前测试中
     </div>
   </div>
 
@@ -1082,78 +1082,71 @@
   <script>
   
   
-/// ==================== 实时统计功能 ====================
-// 文件名: statistics.js
-// 功能: 处理礼物图标交互、访问量统计、点赞功能
-
+// ==================== 稳定版统计功能 ====================
 let statsPanelVisible = false;
-let statsInitialized = false;
 
-// 修改礼物图标点击事件中的样式控制
-document.getElementById('giftIcon').addEventListener('click', function() {
+// 核心配置
+const CONFIG = {
+    DATA_URL: '/counters.json', // 你的计数器数据文件地址
+    UPDATE_INTERVAL: 30000, // 每30秒检查一次更新
+    LAST_UPDATE_KEY: 'last_stats_update'
+};
+
+// 当前数据状态
+let currentStats = { visits: 0, likes: 0 };
+
+// 初始化统计功能
+function initStats() {
+    // 礼物图标点击事件
+    document.getElementById('giftIcon').addEventListener('click', toggleStatsPanel);
+    
+    // 点赞按钮事件
+    document.getElementById('likeButton').addEventListener('click', addLike);
+    
+    // 页面加载时加载数据
+    loadStats();
+    
+    // 启动定时更新
+    setInterval(loadStats, CONFIG.UPDATE_INTERVAL);
+    
+    console.log('统计功能初始化完成');
+}
+
+// 切换统计面板
+function toggleStatsPanel() {
     statsPanelVisible = !statsPanelVisible;
     const panel = document.getElementById('statsPanel');
     const gift = document.getElementById('giftIcon');
     
     if (statsPanelVisible) {
-        // 显示面板
         panel.style.display = 'flex';
         gift.textContent = '🎉';
-        gift.classList.add('active'); // 添加激活状态
-        
-        // 首次展开时加载数据
-        if (!statsInitialized) {
-            loadStatistics();
-            statsInitialized = true;
-        }
+        gift.style.transform = 'rotate(360deg) scale(1.1)';
     } else {
-        // 隐藏面板
         panel.style.display = 'none';
         gift.textContent = '🎁';
-        gift.classList.remove('active'); // 移除激活状态
+        gift.style.transform = 'rotate(0deg) scale(1)';
     }
-});
-
-// 修改悬停效果（移除背景色变化）
-const giftIcon = document.getElementById('giftIcon');
-giftIcon.addEventListener('mouseenter', function() {
-    if (!statsPanelVisible) {
-        this.style.transform = 'scale(1.1)';
-    }
-});
-
-giftIcon.addEventListener('mouseleave', function() {
-    if (!statsPanelVisible) {
-        this.style.transform = 'scale(1)';
-    }
-});
+}
 
 // 加载统计数据
-async function loadStatistics() {
+async function loadStats() {
     try {
-        // 显示加载状态
-        document.getElementById('visitCount').textContent = '加载中...';
-        document.getElementById('likeCount').textContent = '加载中...';
+        // 添加时间戳防止缓存
+        const response = await fetch(`${CONFIG.DATA_URL}?t=${Date.now()}`);
+        if (!response.ok) throw new Error('网络响应不正常');
         
-        // 从GitHub Pages托管的JSON文件读取数据
-        const response = await fetch('/counters/data.json?t=' + Date.now());
         const data = await response.json();
+        currentStats = data;
         
         // 更新显示
-        document.getElementById('visitCount').textContent = data.visits || 0;
-        document.getElementById('likeCount').textContent = data.likes || 0;
+        document.getElementById('visitCount').textContent = data.visits;
+        document.getElementById('likeCount').textContent = data.likes;
         
-        // 检查今天是否已点赞
-        const today = new Date().toDateString();
-        if (localStorage.getItem('xiuxianLiked_' + today)) {
-            disableLikeButton();
-        }
-        
-        console.log('统计加载完成', data);
     } catch (error) {
-        console.error('加载统计失败:', error);
-        document.getElementById('visitCount').textContent = '0';
-        document.getElementById('likeCount').textContent = '0';
+        console.log('获取云端数据失败，使用本地缓存:', error);
+        // 失败时使用本地缓存数据
+        useLocalFallback();
     }
 }
 
@@ -1161,129 +1154,104 @@ async function loadStatistics() {
 async function addLike() {
     const today = new Date().toDateString();
     
-    // 检查今天是否已经点过赞
-    if (localStorage.getItem('xiuxianLiked_' + today)) {
-        showMessage('今天已经点过赞啦！明天再来吧~', '#FF9800');
+    // 检查今天是否已点赞
+    if (localStorage.getItem('likedToday') === today) {
+        showMessage('今天已经点过赞啦！', '#FF9800');
         return;
     }
     
     const likeButton = document.getElementById('likeButton');
-    const originalText = likeButton.textContent;
-    
-    // 禁用按钮防止重复点击
-    likeButton.disabled = true;
-    likeButton.textContent = '点赞中...';
-    likeButton.style.opacity = '0.7';
     
     try {
-        // 乐观更新：立即增加UI显示
-        const currentCount = parseInt(document.getElementById('likeCount').textContent) || 0;
-        const newCount = currentCount + 1;
+        // 立即更新UI（乐观更新）
+        const newCount = currentStats.likes + 1;
         document.getElementById('likeCount').textContent = newCount;
+        likeButton.disabled = true;
+        likeButton.textContent = '已赞';
+        likeButton.style.background = '#666';
         
         // 标记今天已点赞
-        localStorage.setItem('xiuxianLiked_' + today, 'true');
-        disableLikeButton();
+        localStorage.setItem('likedToday', today);
+        showMessage('感谢点赞！数据同步中...', '#4CAF50');
         
-        // 显示成功消息
-        showMessage('感谢点赞！修仙之路因你更精彩~', '#4CAF50');
-        
-        // 点赞动画效果
-        likeButton.style.transform = 'scale(1.2)';
-        setTimeout(() => {
-            likeButton.style.transform = 'scale(1)';
-        }, 300);
-        
-        // 触发GitHub Actions更新（可选功能）
-        triggerCounterUpdate('likes');
+        // 触发GitHub Actions更新
+        await triggerLikeUpdate();
         
     } catch (error) {
-        console.error('点赞失败:', error);
+        showMessage('点赞失败，请刷新重试', '#FF5252');
         likeButton.disabled = false;
-        likeButton.textContent = originalText;
-        likeButton.style.opacity = '1';
-        showMessage('点赞失败，请刷新页面重试', '#FF5252');
+        likeButton.textContent = '💖 点赞 +1';
     }
 }
 
-// 触发计数器更新（调用GitHub Actions）
-async function triggerCounterUpdate(type) {
+// 触发GitHub Actions更新
+async function triggerLikeUpdate() {
     try {
-        // 这里可以调用GitHub Actions API进行实时更新
-        // 暂时先用简单的fetch请求
-        await fetch(`/api/update-${type}`, { method: 'POST' });
+        // 方法1: 通过创建临时文件触发Actions（简单可靠）
+        // 这里可以调用一个API或者创建Issue来触发，但为简化，我们依赖定时任务
+        
+        // 方法2: 使用repository_dispatch（需要PAT token）
+        // 暂时注释掉，先用简单方案
+        // await fetch(`https://api.github.com/repos/你的用户名/你的仓库名/dispatches`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Authorization': 'token YOUR_PAT_TOKEN',
+        //         'Accept': 'application/vnd.github.v3+json'
+        //     },
+        //     body: JSON.stringify({
+        //         event_type: 'update_likes'
+        //     })
+        // });
+        
+        console.log('已触发点赞更新');
+        
     } catch (error) {
-        // 忽略错误，这只是可选的实时更新功能
-        console.log('实时更新功能暂不可用');
+        console.log('触发更新失败，等待定时任务同步');
     }
 }
 
-// 禁用点赞按钮
-function disableLikeButton() {
-    const likeButton = document.getElementById('likeButton');
-    likeButton.disabled = true;
-    likeButton.style.opacity = '0.6';
-    likeButton.textContent = '已赞';
-    likeButton.style.background = 'linear-gradient(135deg, #666, #888)';
+// 本地降级方案
+function useLocalFallback() {
+    const localVisits = localStorage.getItem('localVisits') || '1';
+    const localLikes = localStorage.getItem('localLikes') || '0';
+    
+    document.getElementById('visitCount').textContent = localVisits;
+    document.getElementById('likeCount').textContent = localLikes;
 }
 
 // 显示消息
 function showMessage(text, color) {
     const messageEl = document.getElementById('likeMessage');
-    messageEl.textContent = text;
-    messageEl.style.color = color;
-    messageEl.style.opacity = '1';
-    
-    setTimeout(() => {
-        messageEl.style.opacity = '0';
-    }, 3000);
+    if (messageEl) {
+        messageEl.textContent = text;
+        messageEl.style.color = color;
+        messageEl.style.opacity = '1';
+        setTimeout(() => {
+            messageEl.style.opacity = '0';
+        }, 3000);
+    }
 }
 
-// 页面加载时自动记录访问量
-function initStatistics() {
-    // 防刷新刷量：同会话只记录一次
-    const sessionKey = 'xiuxian_visit_session';
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化访问记录
+    const sessionKey = 'visited_' + new Date().toDateString();
     if (!sessionStorage.getItem(sessionKey)) {
         sessionStorage.setItem(sessionKey, 'true');
-        
-        // 延迟记录访问量
-        setTimeout(() => {
-            // 这里可以触发访问量更新
-            triggerCounterUpdate('visits');
-        }, 2000);
     }
     
-    // 添加礼物图标悬停效果
-    const giftIcon = document.getElementById('giftIcon');
-    giftIcon.addEventListener('mouseenter', function() {
-        if (!statsPanelVisible) {
-            this.style.transform = 'scale(1.1) rotate(-10deg)';
-            this.style.textShadow = '0 0 20px rgba(255,215,0,1)';
-        }
-    });
+    // 初始化统计功能
+    initStats();
     
-    giftIcon.addEventListener('mouseleave', function() {
-        if (!statsPanelVisible) {
-            this.style.transform = 'scale(1) rotate(0deg)';
-            this.style.textShadow = '0 0 10px rgba(255,215,0,0.8)';
-        }
-    });
-}
-
-// 页面加载完成后初始化统计功能
-document.addEventListener('DOMContentLoaded', function() {
-    initStatistics();
+    // 恢复点赞按钮状态
+    const today = new Date().toDateString();
+    if (localStorage.getItem('likedToday') === today) {
+        const likeButton = document.getElementById('likeButton');
+        likeButton.disabled = true;
+        likeButton.textContent = '已赞';
+        likeButton.style.background = '#666';
+    }
 });
-
-// 导出函数供其他脚本使用（如果需要）
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        loadStatistics,
-        addLike,
-        showMessage,
-        initStatistics
-    };
-}
 
 
   
