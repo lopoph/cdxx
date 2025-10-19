@@ -3,14 +3,14 @@ name: 🎯 修仙统计更新
 on:
 workflow_dispatch:
   repository_dispatch:
-    types: [类型：[[]]
+    types: [increment_counter]
 
 permissions:
   contents: write
 
 jobs:
   update-counter:
-    runs-on: run-on:ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: 🛠️ 检出仓库
         uses: actions/checkout@v4
@@ -20,21 +20,21 @@ jobs:
       - name: 📊 更新计数器
         run: |
           # 读取当前数据
-如果[-f data.json]；则
-echo"📖 读取现有的data.json"
-views=$(jq-r'.views'data.json)
-likes=$(jq-r'.likes'data.json)
-其他
-echo"🆕 创建新的data.json"
-views=0
-点赞=0
-Fi
+          if [ -f data.json ]; then
+            echo "📖 读取现有的data.json"
+            views=$(jq -r '.views' data.json)
+            likes=$(jq -r '.likes' data.json)
+          else
+            echo "🆕 创建新的data.json"
+            views=0
+            likes=0
+          fi
           
           # 获取事件类型并更新计数
-event_TYPE="${{github.event.client_payload.type}}"
-echo"📝 事件类型：$event_TYPE"
+          EVENT_TYPE="${{ github.event.client_payload.type }}"
+          echo "📝 事件类型: $EVENT_TYPE"
           
-如果["$EVENT_TYPE"="view"]；则
+          if [ "$EVENT_TYPE" = "view" ]; then
             views=$((views + 1))
             echo "👁️ 访问量增加到: $views"
           elif [ "$EVENT_TYPE" = "like" ]; then
