@@ -1,46 +1,60 @@
-name: Update Stats
+name: Update Stats Every 5 Minutes
 on:
   schedule:
-    - cron: '*/5 * * * *'  # 每5分钟运行一次
+    - cron: '*/5 * * * *'  # 每5分钟一次
   workflow_dispatch:        # 允许手动触发
 
 permissions:
   contents: write
 
 jobs:
-  update:
+  update-stats:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Update counters
+      - name: Setup environment
         run: |
-          # 读取当前数据
-          if [ -f "data.json" ]; then
-            visits=$(jq '.visits' data.json)
-            likes=$(jq '.likes' data.json)
-          else
-            visits=1
-            likes=0
+          # 创建数据文件（如果不存在）
+          if [ ! -f "data.json" ]; then
+            echo '{"visits": 1, "likes": 0, "updated": "初始时间"}' > data.json
           fi
-          
-          # 增加访问量（每次运行+1）
-          new_visits=$((visits + 1))
-          
-          # 更新data.json
-          echo '{
-            "visits": '$new_visits',
-            "likes": '$likes',
-            "updated": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"
-          }' > data.json
-          
-          echo "更新数据: visits=$new_visits, likes=$likes"
 
-      - name: Commit and push
+      - name: Read current data
+        id: get-data
+        run: |
+          # 读取当前数据（使用-r参数获取原始值）
+          visits=$(jq -r '.visits' data.json)
+          likes=$(jq -r '.likes' data.json)
+          echo "当前数据: visits=$visits, likes=$likes"
+          echo "visits=$visits" >> $GITHUB_OUTPUT
+          echo "likes=$likes" >> $GITHUB_OUTPUT
+
+      - name: Update statistics
+        run: |
+          # 使用上一步读取的数据
+          CURRENT_VISITS=${{ steps.get-data.outputs.visits }}
+          CURRENT_LIKES=${{ steps.get-data.outputs.likes }}
+          
+          # 增加访问量
+          NEW_VISITS=$((CURRENT_VISITS + 1))
+          
+          echo "更新数据: visits=$NEW_VISITS, likes=$CURRENT_LIKES"
+          
+          # 更新data.json文件
+          jq --argjson visits "$NEW_VISITS" \
+             --argjson likes "$CURRENT_LIKES" \
+             --arg updated "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+             '.visits = $visits | .likes = $likes | .updated = $updated' \
+             data.json > temp.json && mv temp.json data.json
+
+      - name: Commit and push changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data.json
-          git commit -m "📊 自动更新统计 [skip ci]" || echo "无变化"
+          git diff --quiet && git diff --staged --quiet || git commit -m "📊 更新统计: 访问量+1 [skip ci]"
           git push
