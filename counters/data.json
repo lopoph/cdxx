@@ -1,5 +1,0 @@
-{
-  "visits": 1,
-  "likes": 0,
-  "updated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-}
