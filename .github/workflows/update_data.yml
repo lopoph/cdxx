@@ -1,13 +1,11 @@
-name: Update Stats Data
+name: Update Stats
 on:
-  # 方式1: 定时触发，每5分钟运行一次（用于更新访问量等）
   schedule:
-    - cron: '*/5 * * * *'
-  # 方式2: 手动触发（用于测试）
-  workflow_dispatch:
-  # 方式3: 当有新的Issue被创建时触发（用于处理点赞等用户交互）
-  issues:
-    types: [opened]
+    - cron: '*/5 * * * *'  # 每5分钟运行一次
+  workflow_dispatch:        # 允许手动触发
+
+permissions:
+  contents: write
 
 jobs:
   update:
@@ -16,39 +14,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Update data.json
+      - name: Update counters
         run: |
-          # 1. 确保data.json存在，若不存在则创建
-          if [ ! -f "data.json" ]; then
-            echo '{"visits": 0, "likes": 0, "updated": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}' > data.json
-          fi
-
-          # 2. 读取当前数据
-          CURRENT_VISITS=$(jq -r '.visits' data.json)
-          CURRENT_LIKES=$(jq -r '.likes' data.json)
-          
-          # 3. 判断触发类型并更新数据
-          # 如果是因新的Issue触发，且Issue标题包含特定关键词（如“[LIKE]”），则增加点赞数
-          if [[ "${{ github.event_name }}" == "issues" && "${{ github.event.action }}" == "opened" ]]; then
-            if echo "${{ github.event.issue.title }}" | grep -q "\[LIKE\]"; then
-              NEW_LIKES=$((CURRENT_LIKES + 1))
-              jq --argjson likes "$NEW_LIKES" '.likes = $likes' data.json > temp.json && mv temp.json data.json
-              echo "👍 点赞数已更新为: $NEW_LIKES"
-            fi
+          # 读取当前数据
+          if [ -f "data.json" ]; then
+            visits=$(jq '.visits' data.json)
+            likes=$(jq '.likes' data.json)
           else
-            # 否则（定时或手动触发），主要更新访问量，可在这里加入其他逻辑
-            NEW_VISITS=$((CURRENT_VISITS + 1))
-            jq --argjson visits "$NEW_VISITS" '.visits = $visits' data.json > temp.json && mv temp.json data.json
-            echo "👁️ 访问量已更新为: $NEW_VISITS"
+            visits=1
+            likes=0
           fi
+          
+          # 增加访问量（每次运行+1）
+          new_visits=$((visits + 1))
+          
+          # 更新data.json
+          echo '{
+            "visits": '$new_visits',
+            "likes": '$likes',
+            "updated": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"
+          }' > data.json
+          
+          echo "更新数据: visits=$new_visits, likes=$likes"
 
-          # 4. 更新最后修改时间
-          jq --arg updated "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" '.updated = $updated' data.json > temp.json && mv temp.json data.json
-
-      - name: Commit and push changes
+      - name: Commit and push
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           git add data.json
-          git commit -m "🔄 Auto-update stats data [skip ci]" || exit 0
+          git commit -m "📊 自动更新统计 [skip ci]" || echo "无变化"
           git push
