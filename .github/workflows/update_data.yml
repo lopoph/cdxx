@@ -1,68 +1,70 @@
-name: Update Stats Every 5 Minutes
+name: 🎯 修仙统计更新
+
 on:
-  schedule:
-    - cron: '*/5 * * * *'
-  workflow_dispatch:
-  push:
-    branches: [main]
+  repository_dispatch:
+    types: [increment_counter]
 
 permissions:
   contents: write
 
 jobs:
-  update-stats:
+  update-counter:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: 🛠️ 检出仓库
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Debug - List files
+      - name: 📊 更新计数器
         run: |
-          echo "=== 当前目录文件 ==="
-          ls -la
-          echo "=== data.json 内容 ==="
-          cat data.json || echo "data.json不存在"
-          echo "=== .github/workflows/ 内容 ==="
-          ls -la .github/workflows/
-
-      - name: Read current data
-        id: get-data
-        run: |
-          # 确保data.json存在
-          if [ ! -f "data.json" ]; then
-            echo '{"visits": 1, "likes": 0, "updated": "初始时间"}' > data.json
+          # 读取当前数据
+          if [ -f data.json ]; then
+            echo "📖 读取现有的data.json"
+            views=$(jq -r '.views' data.json)
+            likes=$(jq -r '.likes' data.json)
+          else
+            echo "🆕 创建新的data.json"
+            views=0
+            likes=0
           fi
           
-          # 读取数据（带错误处理）
-          visits=$(jq -r '.visits' data.json 2>/dev/null || echo "1")
-          likes=$(jq -r '.likes' data.json 2>/dev/null || echo "0")
+          # 获取事件类型并更新计数
+          EVENT_TYPE="${{ github.event.client_payload.type }}"
+          echo "📝 事件类型: $EVENT_TYPE"
           
-          echo "当前数据: visits=$visits, likes=$likes"
-          echo "visits=$visits" >> $GITHUB_OUTPUT
-          echo "likes=$likes" >> $GITHUB_OUTPUT
-
-      - name: Update statistics
-        run: |
-          CURRENT_VISITS=${{ steps.get-data.outputs.visits }}
-          CURRENT_LIKES=${{ steps.get-data.outputs.likes }}
-          NEW_VISITS=$((CURRENT_VISITS + 1))
+          if [ "$EVENT_TYPE" = "view" ]; then
+            views=$((views + 1))
+            echo "👁️ 访问量增加到: $views"
+          elif [ "$EVENT_TYPE" = "like" ]; then
+            likes=$((likes + 1))
+            echo "👍 点赞数增加到: $likes"
+          fi
           
-          echo "更新数据: visits=$NEW_VISITS, likes=$CURRENT_LIKES"
+          # 更新数据文件
+          echo "💾 写入更新后的数据..."
+          echo "{
+            \"views\": $views,
+            \"likes\": $likes,
+            \"last_updated\": \"$(date -Iseconds)\",
+            \"last_action\": \"$EVENT_TYPE\"
+          }" > data.json
           
-          # 更新文件（强制更新）
-          echo '{"visits": '$NEW_VISITS', "likes": '$CURRENT_LIKES', "updated": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}' > data.json
-          
-          echo "=== 更新后的data.json ==="
+          echo "✅ 更新完成:"
           cat data.json
 
-      - name: Commit and push changes
+      - name: 📤 提交更改
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data.json
-          
-          # 强制提交（无论是否有变化）
-          git commit -m "📊 更新统计: 访问量+1 [skip ci]" || exit 0
+          git commit -m "📈 自动更新: ${{ github.event.client_payload.type }}计数 [skip ci]"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🎉 完成通知
+        run: |
+          echo "✅ 统计更新完成！"
+          echo "📊 最新数据:"
+          cat data.json
