@@ -58,14 +58,7 @@
     }
 }
 
-
-    
-    
-    
-    
-    
-    
-    @keyframes fadeIn {
+@keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
     }
@@ -607,11 +600,132 @@
       white-space: nowrap;
     }
     
+    /* 吃丹计算器特有样式 - 修改后的样式 */
+    .dan-input-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 15px;
+      gap: 5px;
+    }
     
+    .life-input, .attack-input {
+      background-color: #e6f7e6;
+      border-radius: 5px;
+      padding: 8px;
+      border: 1px solid #c3e6c3;
+      width: auto;
+      min-width: 80px;
+      text-align: center;
+    }
     
+    .attack-input {
+      background-color: #ffe6e6;
+      border: 1px solid #f5c6cb;
+    }
     
+    .dan-quantity-container {
+      width: 200px;
+      margin: 15px auto;
+      text-align: center;
+      background-color: #f0f0f0; /* 灰色背景 */
+      border-radius: 8px;
+      padding: 10px;
+    }
     
+    .dan-quantity-container input {
+      width: 90%;
+      padding: 8px;
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      text-align: center;
+    }
     
+    .dan-bonus-container {
+      background-color: #e6e6ff; /* 紫色背景 */
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    
+    .dan-bonus-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+      color: #4a6fa5;
+    }
+    
+    .dan-bonus-input {
+      display: inline-block;
+    }
+    
+    .dan-bonus-input input {
+      width: 120px;
+      padding: 8px;
+      border: 1px solid #d0b0f0;
+      border-radius: 3px;
+      background-color: #fffffff; /* 输入框无颜色 */
+      text-align: center;
+    }
+    
+    .dan-hint {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 10px;
+    }
+    
+    .reverse-power-container {
+      background-color: #fffacd; /* 金色背景 */
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    
+    .reverse-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+      color: #4a6fa5;
+    }
+    
+    .reverse-input-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 15px auto;
+    }
+    
+    .reverse-input-group input {
+      width: 120px;
+      padding: 8px;
+      border: 1px solid #e0d0a0;
+      border-radius: 3px;
+      background-color: #ffffffff; /* 输入框无颜色 */
+      text-align: center;
+    }
+    
+    .button-container {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .button-container button {
+      flex: 1;
+    }
+    
+    .reverse-button {
+      background-color: #d63384;
+    }
+    
+    .reverse-button:hover {
+      background-color: #c22575;
+    }
+
     /* 福袋悬停动画 */
 #lucky-bag:hover {
   animation: bounce 0.5s infinite alternate;
@@ -754,9 +868,8 @@
 </head>
 
 <body>
-<!-- 音乐信息显示容器 - 添加到<body>标签内的任意位置 -->
-
-
+<!-- 音乐信息显示容器 -->
+<div id="music-info"></div>
 
   <h1 style="display: flex; align-items: center; justify-content: center;">
     <i class="fas fa-yin-yang rotating-image" style="color: #4a6fa5; font-size: 40px; margin-right: 15px;"></i>
@@ -764,14 +877,15 @@
   </h1>
 
   <div class="qq-group-section">
-    <span>有要改进的地方可进QQ群说：371408377</span>
+    <span>有没有吊大的进群带带我：371408377</span>
     <button onclick="copyQQGroup()" class="copy-btn">复制</button>
   </div>
 
   <div class="tab-container">
     <div class="tab active" onclick="switchTab('power', 0)">战力</div>
     <div class="tab" onclick="switchTab('base', 1)">基础</div>
-    <div class="tab" onclick="switchTab('bath', 2)">泡澡</div>
+    <div class="tab" onclick="switchTab('dan', 2)">吃丹</div>
+    <div class="tab" onclick="switchTab('bath', 3)">泡澡</div>
   </div>
 
   <div class="content-container" id="content-container">
@@ -799,10 +913,10 @@
                 <option value="100000000000000000000000000000000000000000000">载</option>
                 <option value="1000000000000000000000000000000000000000000000000">极</option>
                 <option value="10000000000000000000000000000000000000000000000000000">恒河沙</option>
-                <option value="100000000000000000000000000000000000000000000000000000000">阿僧祇</option>
-                <option value="1000000000000000000000000000000000000000000000000000000000000">那由他</option>
+                               <option value="100000000000000000000000000000000000000000000000000000000">阿僧祇</option>
+                <option value="0000000000000000000000000000000000000000000000000000000000000">那由他</option>
                 <option value="10000000000000000000000000000000000000000000000000000000000000000">不可思议</option>
-                <option value="100000000000000000000000000000000000000000000000000000000000000000000">无量</option>
+                <option value="100000000000000000000000000000000000000000000000000000000000000000000000000000000000">无量</option>
                 <option value="1000000000000000000000000000000000000000000000000000000000000000000000000">大数</option>
                 <option value="10000000000000000000000000000000000000000000000000000000000000000000000000000">无敌</option>
               </select>
@@ -889,7 +1003,7 @@
                 <option value="1000000000000">兆</option>
                 <option value="10000000000000000">京</option>
                 <option value="100000000000000000000">垓</option>
-                <option value="1000000000000000000000000">秭</option>
+                <option value="100000000000000000000000">秭</option>
                 <option value="10000000000000000000000000000">穰</option>
                 <option value="100000000000000000000000000000000">沟</option>
                 <option value="1000000000000000000000000000000000000">涧</option>
@@ -897,10 +1011,10 @@
                 <option value="100000000000000000000000000000000000000000000">载</option>
                 <option value="1000000000000000000000000000000000000000000000000">极</option>
                 <option value="10000000000000000000000000000000000000000000000000000">恒河沙</option>
-                               <option value="100000000000000000000000000000000000000000000000000000000">阿僧祇</option>
+                <option value="100000000000000000000000000000000000000000000000000000000">阿僧祇</option>
                 <option value="1000000000000000000000000000000000000000000000000000000000000">那由他</option>
                 <option value="10000000000000000000000000000000000000000000000000000000000000000">不可思议</option>
-                <option value="100000000000000000000000000000000000000000000000000000000000000000000">无量</option>
+                <option value="100000000000000000000000000000000000000000000000000000000000000000000000000">无量</option>
                 <option value="1000000000000000000000000000000000000000000000000000000000000000000000000">大数</option>
                 <option value="10000000000000000000000000000000000000000000000000000000000000000000000000000">无敌</option>
               </select>
@@ -944,6 +1058,118 @@
         <div class="bonus-hint">不填默认为0</div>
 
         <button onclick="reverseCalculate()">反推基础属性</button>
+      </div>
+
+      <!-- 吃丹计算 -->
+      <div id="dan-tab" class="tab-content">
+        <!-- 修改后的吃丹计算器样式 -->
+        <div class="dan-input-group">
+          <input type="number" id="dan-base-life" step="0.01" placeholder="输入生命" class="life-input">
+          <input type="number" id="dan-base-attack" step="0.01" placeholder="输入攻击" class="attack-input">
+          <select id="dan-base-unit">
+            <option value="1" selected>个</option>
+            <option value="10000">万</option>
+            <option value="100000000">亿</option>
+            <option value="1000000000000">兆</option>
+            <option value="10000000000000000">京</option>
+            <option value="100000000000000000000">垓</option>
+            <option value="1000000000000000000000000">秭</option>
+            <option value="10000000000000000000000000000">穰</option>
+            <option value="100000000000000000000000000000000">沟</option>
+            <option value="1000000000000000000000000000000000000">涧</option>
+            <option value="10000000000000000000000000000000000000000">正</option>
+            <option value="100000000000000000000000000000000000000000000">载</option>
+            <option value="1000000000000000000000000000000000000000000000000">极</option>
+            <option value="10000000000000000000000000000000000000000000000000000">恒河沙</option>
+            <option value="100000000000000000000000000000000000000000000000000000000">阿僧祇</option>
+            <option value="1000000000000000000000000000000000000000000000000000000000000">那由他</option>
+            <option value="10000000000000000000000000000000000000000000000000000000000000000">不可思议</option>
+            <option value="100000000000000000000000000000000000000000000000000000000000000000000">无量</option>
+            <option value="1000000000000000000000000000000000000000000000000000000000000000000">大数</option>
+            <option value="10000000000000000000000000000000000000000000000000000000000000000000000000000">无敌</option>
+          </select>
+        </div>
+        
+        <div class="dan-quantity-container">
+          <input type="number" id="dan-quantity" step="1" min="1" placeholder="输入丹数量">
+        </div>
+        
+        <div class="bonus-container">
+          <div class="bonus-box life-bonus">
+            <div class="bonus-title">生命</div>
+            <div class="bonus-input-group">
+              <label class="bonus-label">加成：</label>
+              <input type="number" id="dan-life-bonus" step="0.01" placeholder="输入百分比" class="bonus-input">
+            </div>
+            <div class="bonus-input-group">
+              <label class="bonus-label">提升：</label>
+              <input type="number" id="dan-life-boost" step="0.01" placeholder="输入百分比" class="bonus-input" oninput="syncDanBoostValues('life', this.value)">
+            </div>
+            <div class="bonus-input-group">
+              <label class="bonus-label">增幅：</label>
+              <input type="number" id="dan-life-amplify" step="0.01" placeholder="输入百分比" class="bonus-input">
+            </div>
+          </div>
+          
+          <div class="bonus-box attack-bonus">
+            <div class="bonus-title">攻击</div>
+            <div class="bonus-input-group">
+              <label class="bonus-label">加成：</label>
+              <input type="number" id="dan-attack-bonus" step="0.01" placeholder="输入百分比" class="bonus-input">
+            </div>
+            <div class="bonus-input-group">
+              <label class="bonus-label">提升：</label>
+              <input type="number" id="dan-attack-boost" step="0.01" placeholder="输入百分比" class="bonus-input" oninput="syncDanBoostValues('attack', this.value)">
+            </div>
+            <div class="bonus-input-group">
+              <label class="bonus-label">增幅：</label>
+              <input type="number" id="dan-attack-amplify" step="0.01" placeholder="输入百分比" class="bonus-input">
+            </div>
+          </div>
+        </div>
+        
+        <div class="dan-bonus-container">
+          <div class="dan-bonus-title">吃丹：</div>
+          <div class="dan-bonus-input">
+            <input type="number" id="dan-bonus" step="0.01" placeholder="输入百分比">
+          </div>
+        </div>
+        
+        <div class="dan-hint">不填默认为0</div>
+        
+        <div class="reverse-power-container">
+          <div class="reverse-title">丹药反推：</div>
+          <div class="reverse-input-group">
+            <input type="number" id="target-power-dan" step="0.01" placeholder="输入想加多少战力">
+            <select id="target-power-unit-dan">
+              <option value="1" selected>个</option>
+              <option value="10000">万</option>
+              <option value="100000000">亿</option>
+              <option value="1000000000000">兆</option>
+              <option value="10000000000000000">京</option>
+              <option value="100000000000000000000">垓</option>
+              <option value="0000000000000000000000000000">秭</option>
+              <option value="10000000000000000000000000000">穰</option>
+              <option value="100000000000000000000000000000000">沟</option>
+              <option value="1000000000000000000000000000000000000">涧</option>
+              <option value="10000000000000000000000000000000000000000">正</option>
+              <option value="100000000000000000000000000000000000000000000">载</option>
+              <option value="1000000000000000000000000000000000000000000000000"></option>
+              <option value="10000000000000000000000000000000000000000000000000000">恒河沙</option>
+              <option value="100000000000000000000000000000000000000000000000000000000">阿僧祇</option>
+              <option value="1000000000000000000000000000000000000000000000000000000000000">那由他</option>
+              <option value="10000000000000000000000000000000000000000000000000000000000000000">不可思议</option>
+              <option value="100000000000000000000000000000000000000000000000000000000000000000000">无量</option>
+              <option value="1000000000000000000000000000000000000000000000000000000000000000000000000">大数</option>
+              <option value="10000000000000000000000000000000000000000000000000000000000000000000000000000000">无敌</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="button-container">
+          <button onclick="calculateDan()">计算吃丹效果</button>
+          <button class="reverse-button" onclick="reverseCalculateDan()">反推丹药数量</button>
+        </div>
       </div>
 
       <!-- 泡澡计算 -->
@@ -993,11 +1219,11 @@
                 <option value="1000000000000000000000000000000000000">涧</option>
                 <option value="10000000000000000000000000000000000000000">正</option>
                 <option value="100000000000000000000000000000000000000000000">载</option>
-                <option value="1000000000000000000000000000000000000000000000000">极</option>
+                <option value="100000000000000000000000000000000000000000000000">极</option>
                 <option value="10000000000000000000000000000000000000000000000000000">恒河沙</option>
                 <option value="100000000000000000000000000000000000000000000000000000000">阿僧祇</option>
                 <option value="1000000000000000000000000000000000000000000000000000000000000">那由他</option>
-                <option value="10000000000000000000000000000000000000000000000000000000000000000">不可思议</option>
+                <option value="1000000000000000000000000000000000000000000000000000000000000000">不可思议</option>
                 <option value="100000000000000000000000000000000000000000000000000000000000000000000">无量</option>
                 <option value="1000000000000000000000000000000000000000000000000000000000000000000000000">大数</option>
                 <option value="10000000000000000000000000000000000000000000000000000000000000000000000000000">无敌</option>
@@ -1056,6 +1282,44 @@
     </div>
   </div>
 
+  <!-- 吃丹计算结果 -->
+  <div class="result-section hidden" id="dan-result-section">
+    <h2>吃丹结果</h2>
+    <div class="result-row">
+      <span class="result-label">基础生命增加：</span>
+      <span id="enhanced-life" class="result-value">0 个</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">基础攻击增加：</span>
+      <span id="enhanced-attack" class="result-value">0 个</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">生命战力增加：</span>
+      <span id="dan-final-life" class="result-value">0 个</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">攻击战力增加：</span>
+          <span id="dan-final-attack" class="result-value">0 个</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">总战力增加：</span>
+      <span id="dan-total-power" class="result-value">0 个</span>
+    </div>
+  </div>
+
+  <!-- 吃丹反推结果 -->
+  <div class="result-section hidden" id="dan-reverse-result-section">
+    <h2>反推结果</h2>
+    <div class="result-row">
+      <span class="result-label">所需丹药数量：</span>
+      <span id="required-dan-count" class="result-value">0 颗</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">验证战力：</span>
+      <span id="verify-power" class="result-value">0 个</span>
+    </div>
+  </div>
+
   <!-- 泡澡计算结果 -->
   <div class="result-section hidden" id="bath-result-section">
     <h2>泡澡结果</h2>
@@ -1107,197 +1371,188 @@
   </div>
 
   <script>
-  
-  
-/// ==================== 实时统计功能 ====================
-
-  
-  
-// ===== 完整音乐播放器 =====
-const musicPlayer = (function() {
-    // 音乐库
-    const songs = [
-        { name: "unravel   错的不是我而是这个世界😈", url: "https://music.163.com/song/media/outer/url?id=1452131330.mp3" },
-        { name: "call of silence 为了大海塔塔开🤓 ", url: "https://music.163.com/song/media/outer/url?id=2126022114.mp3" },
-        { name: "青鸟  砂世嘎👇👆👈   那鲁多✌️🖖👈🤘", url: "https://music.163.com/song/media/outer/url?id=27969765.mp3" }
-    ];
-    
-    // 播放状态
-    let currentAudio = null;
-    let isPlaying = false;
-    let currentSong = null;
-    let retryCount = 0;
-    const playHistory = [];
-    const maxHistory = 3;
-    
-    // 创建音乐信息元素
-    const musicInfoEl = document.createElement('div');
-    musicInfoEl.id = 'music-info';
-    document.body.appendChild(musicInfoEl);
-    
-    // 获取随机歌曲（排除当前播放）
-    function getRandomSong(excludeUrl = null) {
-        const availableSongs = songs.filter(song => !excludeUrl || song.url !== excludeUrl);
-        return availableSongs.length > 0 ? 
-            availableSongs[Math.floor(Math.random() * availableSongs.length)] : 
-            songs[0];
-    }
-    
-    // 精确计算文本宽度
-    function getTextWidth(text) {
-        const span = document.createElement('span');
-        span.style.font = '14px "Microsoft YaHei", Arial, sans-serif';
-        span.style.position = 'absolute';
-        span.style.left = '-9999px';
-        span.style.whiteSpace = 'nowrap';
-        span.textContent = text;
-        document.body.appendChild(span);
-        const width = span.offsetWidth;
-        document.body.removeChild(span);
-        return width;
-    }
-    
-    // 显示音乐信息（带精确滚动控制）
-    function showMusicInfo(text, isError = false) {
-        // 重置状态
-        musicInfoEl.style.display = 'block';
-        musicInfoEl.textContent = text;
-        musicInfoEl.style.width = 'auto';
-        musicInfoEl.style.maxWidth = 'none';
+    // ===== 完整音乐播放器 =====
+    const musicPlayer = (function() {
+        // 音乐库
+        const songs = [
+            { name: "unravel   错的不是我而是这个世界😈😈", url: "https://music.163.com/song/media/outer/url?id=1452131330.mp3" },
+            { name: "call of silence 为了大海塔塔开🤓🤓 ", url: "https://music.163.com/song/media/outer/url?id=2126022114.mp3" },
+            { name: "青鸟  砂世嘎👇👆👆👈👈   那鲁多✌✌️🖖🖖🖖👈👈🤘🤘", url: "https://music.163.com/song/media/outer/url?id=27969765.mp3" }
+        ];
         
-        // 计算文字和屏幕宽度
-        const textWidth = getTextWidth(text);
-        const screenWidth = window.innerWidth;
+        // 播放状态
+        let currentAudio = null;
+        let isPlaying = false;
+        let currentSong = null;
+        let retryCount = 0;
+        const playHistory = [];
+        const maxHistory = 3;
         
-        // 动态调整速度（保证阅读体验）
-        const baseSpeed = 100; // 像素/秒
-        const totalDistance = textWidth + screenWidth;
-        const duration = Math.max(8, totalDistance / baseSpeed); // 最少8秒
+        // 创建音乐信息元素
+        const musicInfoEl = document.createElement('div');
+        musicInfoEl.id = 'music-info';
+        document.body.appendChild(musicInfoEl);
         
-        // 设置动画
-        musicInfoEl.style.animation = `${isError ? 'errorScroll' : 'songScroll'} ${duration}s linear ${isError ? 1 : 3}`;
+        // 获取随机歌曲（排除当前播放）
+        function getRandomSong(excludeUrl = null) {
+            const availableSongs = songs.filter(song => !excludeUrl || song.url !== excludeUrl);
+            return availableSongs.length > 0 ? 
+                availableSongs[Math.floor(Math.random() * availableSongs.length)] : 
+                songs[0];
+        }
         
-        // 动画结束处理
-const onAnimationEnd = () => {
-    // 无论是错误信息还是歌词，动画结束后都隐藏
-    musicInfoEl.style.display = 'none';
-    musicInfoEl.style.animation = 'none';
-};
-
+        // 精确计算文本宽度
+        function getTextWidth(text) {
+            const span = document.createElement('span');
+            span.style.font = '14px "Microsoft YaHei", Arial, sans-serif';
+            span.style.position = 'absolute';
+            span.style.left = '-9999px';
+            span.style.whiteSpace = 'nowrap';
+            span.textContent = text;
+            document.body.appendChild(span);
+            const width = span.offsetWidth;
+            document.body.removeChild(span);
+            return width;
+        }
         
-        musicInfoEl.addEventListener('animationend', onAnimationEnd, { once: true });
-    }
-    
-    // 播放音乐核心逻辑
-    function play(song = null) {
-        if (isPlaying) return;
+        // 显示音乐信息（带精确滚动控制）
+        function showMusicInfo(text, isError = false) {
+            // 重置状态
+            musicInfoEl.style.display = 'block';
+            musicInfoEl.textContent = text;
+            musicInfoEl.style.width = 'auto';
+            musicInfoEl.style.maxWidth = 'none';
+            
+            // 计算文字和屏幕宽度
+            const textWidth = getTextWidth(text);
+            const screenWidth = window.innerWidth;
+            
+            // 动态调整速度（保证阅读体验）
+            const baseSpeed = 100; // 像素/秒
+            const totalDistance = textWidth + screenWidth;
+            const duration = Math.max(8, totalDistance / baseSpeed); // 最少8秒
+            
+            // 设置动画
+            musicInfoEl.style.animation = `${isError ? 'errorScroll' : 'songScroll'} ${duration}s linear ${isError ? 1 : 3}`;
+            
+            // 动画结束处理
+            const onAnimationEnd = () => {
+                // 无论是错误信息还是歌词，动画结束后都隐藏
+                musicInfoEl.style.display = 'none';
+                musicInfoEl.style.animation = 'none';
+            };
+            
+            musicInfoEl.addEventListener('animationend', onAnimationEnd, { once: true });
+        }
         
-        const playSong = song || getRandomSong(currentSong?.url);
-        if (!playSong) return;
+        // 播放音乐核心逻辑
+        function play(song = null) {
+            if (isPlaying) return;
+            
+            const playSong = song || getRandomSong(currentSong?.url);
+            if (!playSong) return;
+            
+            currentSong = playSong;
+            updateHistory(playSong);
+            
+            currentAudio = new Audio(playSong.url);
+            currentAudio.volume = 0.5;
+            
+            currentAudio.oncanplay = () => {
+                currentAudio.play()
+                    .then(() => {
+                        isPlaying = true;
+                        retryCount = 0;
+                        showMusicInfo(playSong.name);
+                    })
+                    .catch(err => {
+                        console.error('播放失败:', err);
+                        showMusicInfo('播放失败', true);
+                        if (retryCount < 1) {
+                            retryCount++;
+                            setTimeout(() => play(playSong), 500);
+                        }
+                    });
+            };
+            
+            currentAudio.onerror = () => {
+                showMusicInfo('加载失败', true);
+                if (retryCount < 1) {
+                    retryCount++;
+                    setTimeout(() => play(playSong), 500);
+                }
+            };
+            
+            currentAudio.onended = () => {
+                resetPlayer();
+                setTimeout(() => play(getRandomSong(currentSong.url)), 1000);
+            };
+        }
         
-        currentSong = playSong;
-        updateHistory(playSong);
+        // 重置播放器
+        function resetPlayer() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            isPlaying = false;
+            musicInfoEl.style.display = 'none';
+            musicInfoEl.style.animation = 'none';
+        }
         
-        currentAudio = new Audio(playSong.url);
-        currentAudio.volume = 0.5;
+        // 更新播放历史
+        function updateHistory(song) {
+            playHistory.unshift(song);
+            if (playHistory.length > maxHistory) playHistory.pop();
+        }
         
-        currentAudio.oncanplay = () => {
-            currentAudio.play()
-                .then(() => {
-                    isPlaying = true;
-                    retryCount = 0;
-                    showMusicInfo(playSong.name);
-                })
-                .catch(err => {
-                    console.error('播放失败:', err);
-                    showMusicInfo('播放失败', true);
-                    if (retryCount < 1) {
-                        retryCount++;
-                        setTimeout(() => play(playSong), 500);
-                    }
-                });
-        };
-        
-        currentAudio.onerror = () => {
-            showMusicInfo('加载失败', true);
-            if (retryCount < 1) {
-                retryCount++;
-                setTimeout(() => play(playSong), 500);
+        return {
+            trigger: function() {
+                if (!isPlaying) play();
+            },
+            getCurrentSong: function() {
+                return currentSong;
+            },
+            getHistory: function() {
+                return [...playHistory];
             }
         };
+    })();
+
+    // ===== 交互触发设置 =====
+    function setupMusicTriggers() {
+        // 点击事件
+        document.addEventListener('click', () => musicPlayer.trigger());
         
-        currentAudio.onended = () => {
-            resetPlayer();
-            setTimeout(() => play(getRandomSong(currentSong.url)), 1000);
-        };
+        // 触摸滑动
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+        document.addEventListener('touchend', (e) => {
+            if (Math.abs(e.changedTouches[0].clientX - touchStartX) > 30) {
+                musicPlayer.trigger();
+            }
+        });
+        
+        // 键盘事件
+        document.addEventListener('keydown', () => musicPlayer.trigger());
+        
+        // 输入变化
+        document.querySelectorAll('input, select, textarea').forEach(el => {
+            el.addEventListener('input', () => musicPlayer.trigger());
+        });
+        
+        // 初始随机播放
+        setTimeout(() => musicPlayer.trigger(), 1500);
     }
-    
-    // 重置播放器
-    function resetPlayer() {
-        if (currentAudio) {
-            currentAudio.pause();
-            currentAudio = null;
-        }
-        isPlaying = false;
-        musicInfoEl.style.display = 'none';
-        musicInfoEl.style.animation = 'none';
-    }
-    
-    // 更新播放历史
-    function updateHistory(song) {
-        playHistory.unshift(song);
-        if (playHistory.length > maxHistory) playHistory.pop();
-    }
-    
-    return {
-        trigger: function() {
-            if (!isPlaying) play();
-        },
-        getCurrentSong: function() {
-            return currentSong;
-        },
-        getHistory: function() {
-            return [...playHistory];
-        }
-    };
-})();
 
-// ===== 交互触发设置 =====
-function setupMusicTriggers() {
-    // 点击事件
-    document.addEventListener('click', () => musicPlayer.trigger());
-    
-    // 触摸滑动
-    let touchStartX = 0;
-    document.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-    });
-    document.addEventListener('touchend', (e) => {
-        if (Math.abs(e.changedTouches[0].clientX - touchStartX) > 30) {
-            musicPlayer.trigger();
-        }
-    });
-    
-    // 键盘事件
-    document.addEventListener('keydown', () => musicPlayer.trigger());
-    
-    // 输入变化
-    document.querySelectorAll('input, select, textarea').forEach(el => {
-        el.addEventListener('input', () => musicPlayer.trigger());
-    });
-    
-    // 初始随机播放
-    setTimeout(() => musicPlayer.trigger(), 1500);
-}
-
-// 页面加载初始化
-document.addEventListener('DOMContentLoaded', setupMusicTriggers);
-
-
+    // 页面加载初始化
+    document.addEventListener('DOMContentLoaded', setupMusicTriggers);
 
     // 标签页切换变量
     let currentTabIndex = 0;
-    const tabOrder = ['power', 'base', 'bath'];
+    const tabOrder = ['power', 'base', 'dan', 'bath'];
 
     // 触摸滑动相关变量
     let startX = 0;
@@ -1386,11 +1641,12 @@ document.addEventListener('DOMContentLoaded', setupMusicTriggers);
             content.classList.add('active');
           }
         });
+        
+        // 隐藏所有结果区域
+        document.querySelectorAll('.result-section').forEach(section => {
+          section.classList.add('hidden');
+        });
       }, 50);
-
-      document.getElementById('power-result-section').classList.add('hidden');
-      document.getElementById('base-result-section').classList.add('hidden');
-      document.getElementById('bath-result-section').classList.add('hidden');
     }
 
     // 单位格式化函数
@@ -1428,7 +1684,7 @@ document.addEventListener('DOMContentLoaded', setupMusicTriggers);
       return num.toFixed(2) + " 个";
     }
 
-      // 战力计算函数
+    // 战力计算函数
     function calculatePower() {
       const baseLife = parseFloat(document.getElementById('base-life').value) || 0;
       const baseLifeUnit = parseFloat(document.getElementById('base-life-unit').value) || 1;
@@ -1457,6 +1713,8 @@ document.addEventListener('DOMContentLoaded', setupMusicTriggers);
       document.getElementById('power-result-section').classList.remove('hidden');
       document.getElementById('base-result-section').classList.add('hidden');
       document.getElementById('bath-result-section').classList.add('hidden');
+      document.getElementById('dan-result-section').classList.add('hidden');
+      document.getElementById('dan-reverse-result-section').classList.add('hidden');
     }
 
     // 基础反推函数
@@ -1490,8 +1748,9 @@ document.addEventListener('DOMContentLoaded', setupMusicTriggers);
       document.getElementById('base-result-section').classList.remove('hidden');
       document.getElementById('power-result-section').classList.add('hidden');
       document.getElementById('bath-result-section').classList.add('hidden');
+      document.getElementById('dan-result-section').classList.add('hidden');
+      document.getElementById('dan-reverse-result-section').classList.add('hidden');
     }
-
 
     // 泡澡计算函数
     function calculateBath() {
@@ -1560,6 +1819,8 @@ document.addEventListener('DOMContentLoaded', setupMusicTriggers);
       document.getElementById('bath-result-section').classList.remove('hidden');
       document.getElementById('power-result-section').classList.add('hidden');
       document.getElementById('base-result-section').classList.add('hidden');
+      document.getElementById('dan-result-section').classList.add('hidden');
+      document.getElementById('dan-reverse-result-section').classList.add('hidden');
     }
 
     // 提升数值同步函数
@@ -1597,6 +1858,158 @@ document.addEventListener('DOMContentLoaded', setupMusicTriggers);
           document.getElementById('reverse-life-boost').value = value;
         }
       }
+    }
+
+    // 吃丹计算器的同步函数
+    function syncDanBoostValues(inputType, value) {
+      if (value === '') {
+        if (inputType === 'life') {
+          document.getElementById('dan-attack-boost').value = '';
+        } else if (inputType === 'attack') {
+          document.getElementById('dan-life-boost').value = '';
+        }
+        return;
+      }
+      
+      const numericValue = parseFloat(value);
+      if (isNaN(numericValue)) return;
+      
+      if (inputType === 'life') {
+        document.getElementById('dan-attack-boost').value = value;
+      } else if (inputType === 'attack') {
+        document.getElementById('dan-life-boost').value = value;
+      }
+    }
+
+    // 格式化大数字函数
+    function formatLargeNumber(num) {
+      if (num <= 0) return "0 颗";
+      
+      // 十亿以下的数字显示完整数值
+      if (num < 1000000000) {
+        return num.toLocaleString() + " 颗";
+      } else {
+        // 十亿及以上的数字使用科学计数法
+        const exp = Math.floor(Math.log10(num));
+        const coefficient = num / Math.pow(10, exp);
+        return coefficient.toFixed(2) + " × 10^" + exp + " 颗";
+      }
+    }
+
+    // 吃丹计算函数
+    function calculateDan() {
+      // 获取基础属性
+      const baseLife = parseFloat(document.getElementById('dan-base-life').value) || 0;
+      const baseAttack = parseFloat(document.getElementById('dan-base-attack').value) || 0;
+      const baseUnit = parseFloat(document.getElementById('dan-base-unit').value) || 1;
+      
+      // 获取丹药数量
+      const danQuantity = parseFloat(document.getElementById('dan-quantity').value) || 0;
+      
+      // 获取吃丹加成
+      const danBonus = parseFloat(document.getElementById('dan-bonus').value) || 0;
+      
+      // 获取属性加成
+      const lifeBonus = parseFloat(document.getElementById('dan-life-bonus').value) || 0;
+      const lifeBoost = parseFloat(document.getElementById('dan-life-boost').value) || 0;
+      const lifeAmplify = parseFloat(document.getElementById('dan-life-amplify').value) || 0;
+      
+      const attackBonus = parseFloat(document.getElementById('dan-attack-bonus').value) || 0;
+      const attackBoost = parseFloat(document.getElementById('dan-attack-boost').value) || 0;
+      const attackAmplify = parseFloat(document.getElementById('dan-attack-amplify').value) || 0;
+      
+      // 计算单颗丹药效果
+      const danMultiplier = (1 + danBonus / 100);
+      const singleEnhancedLife = baseLife * baseUnit * danMultiplier;
+      const singleEnhancedAttack = baseAttack * baseUnit * danMultiplier;
+      
+      // 乘以丹药数量
+      const enhancedLife = singleEnhancedLife * danQuantity;
+      const enhancedAttack = singleEnhancedAttack * danQuantity;
+      
+           // 计算属性加成后的最终属性
+      const lifeMultiplier = (1 + lifeBonus/100) * (1 + lifeBoost/100) * (1 + lifeAmplify/100);
+      const attackMultiplier = (1 + attackBonus/100) * (1 + attackBoost/100) * (1 + attackAmplify/100);
+      
+      const finalLife = enhancedLife * lifeMultiplier;
+      const finalAttack = enhancedAttack * attackMultiplier;
+      
+      // 计算总战力
+      const totalPower = finalLife + 5 * finalAttack;
+      
+      // 显示结果
+      document.getElementById('enhanced-life').textContent = formatNumberWithUnit(enhancedLife);
+      document.getElementById('enhanced-attack').textContent = formatNumberWithUnit(enhancedAttack);
+      document.getElementById('dan-final-life').textContent = formatNumberWithUnit(finalLife);
+      document.getElementById('dan-final-attack').textContent = formatNumberWithUnit(finalAttack);
+      document.getElementById('dan-total-power').textContent = formatNumberWithUnit(totalPower);
+      
+      document.getElementById('dan-result-section').classList.remove('hidden');
+      document.getElementById('power-result-section').classList.add('hidden');
+      document.getElementById('base-result-section').classList.add('hidden');
+      document.getElementById('bath-result-section').classList.add('hidden');
+      document.getElementById('dan-reverse-result-section').classList.add('hidden');
+    }
+
+    // 反推丹药数量函数
+    function reverseCalculateDan() {
+      // 获取基础属性
+      const baseLife = parseFloat(document.getElementById('dan-base-life').value) || 0;
+      const baseAttack = parseFloat(document.getElementById('dan-base-attack').value) || 0;
+      const baseUnit = parseFloat(document.getElementById('dan-base-unit').value) || 1;
+      
+      // 获取目标战力
+      const targetPower = parseFloat(document.getElementById('target-power-dan').value) || 0;
+      const targetPowerUnit = parseFloat(document.getElementById('target-power-unit-dan').value) || 1;
+      const totalTargetPower = targetPower * targetPowerUnit;
+      
+      // 获取吃丹加成
+      const danBonus = parseFloat(document.getElementById('dan-bonus').value) || 0;
+      
+      // 获取属性加成
+      const lifeBonus = parseFloat(document.getElementById('dan-life-bonus').value) || 0;
+      const lifeBoost = parseFloat(document.getElementById('dan-life-boost').value) || 0;
+      const lifeAmplify = parseFloat(document.getElementById('dan-life-amplify').value) || 0;
+      
+      const attackBonus = parseFloat(document.getElementById('dan-attack-bonus').value) || 0;
+      const attackBoost = parseFloat(document.getElementById('dan-attack-boost').value) || 0;
+      const attackAmplify = parseFloat(document.getElementById('dan-attack-amplify').value) || 0;
+      
+      // 计算加成系数
+      const lifeMultiplier = (1 + lifeBonus/100) * (1 + lifeBoost/100) * (1 + lifeAmplify/100);
+      const attackMultiplier = (1 + attackBonus/100) * (1 + attackBoost/100) * (1 + attackAmplify/100);
+      
+      // 计算单颗丹药效果
+      const danMultiplier = (1 + danBonus / 100);
+      const singleDanLife = baseLife * baseUnit * danMultiplier;
+      const singleDanAttack = baseAttack * baseUnit * danMultiplier;
+      
+      // 计算单颗丹药的总战力贡献
+      const singleDanLifePower = singleDanLife * lifeMultiplier;
+      const singleDanAttackPower = singleDanAttack * attackMultiplier;
+      const singleDanTotalPower = singleDanLifePower + 5 * singleDanAttackPower;
+      
+      // 计算所需丹药数量
+      const requiredDanCount = Math.ceil(totalTargetPower / singleDanTotalPower);
+      
+      // 计算总丹药效果
+      const totalDanLife = singleDanLife * requiredDanCount;
+      const totalDanAttack = singleDanAttack * requiredDanCount;
+      
+      // 计算验证战力
+      const verifyLife = totalDanLife * lifeMultiplier;
+      const verifyAttack = totalDanAttack * attackMultiplier;
+      const verifyPower = verifyLife + 5 * verifyAttack;
+      
+      // 显示反推结果
+      document.getElementById('required-dan-count').textContent = formatLargeNumber(requiredDanCount);
+      document.getElementById('verify-power').textContent = formatNumberWithUnit(verifyPower);
+      
+      document.getElementById('dan-reverse-result-section').classList.remove('hidden');
+      document.getElementById('power-result-section').classList.add('hidden');
+      document.getElementById('base-result-section').classList.add('hidden');
+      document.getElementById('bath-result-section').classList.add('hidden');
+      document.getElementById('dan-result-section').classList.add('hidden');
     }
 
     // QQ群复制功能
@@ -1980,8 +2393,10 @@ document.addEventListener('DOMContentLoaded', setupMusicTriggers);
     // 初始化页面
     document.addEventListener('DOMContentLoaded', function() {
       initSwipe();
-      initMusicPlayer();
     });
   </script>
 </body>
 </html>
+
+
+
