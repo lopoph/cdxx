@@ -6,6 +6,98 @@
   <title>修仙计算器</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+  
+  
+/* 自定义提示框样式 - 可单独调节长宽高 */
+.custom-showCustomAlert {
+    position: fixed;
+    top: 75%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(40, 40, 60, 0.98);
+    color: white;
+    text-align: center;
+    backdrop-filter: blur(15px);
+    display: none;
+    z-index: 10000;
+    border: 3px solid rgba(255, 215, 0, 0.6);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8);
+    animation: fadeInScale 0.4s ease-out;
+    
+    /* 🎯 单独调节提示框尺寸 - 修改这里的数字 */
+    width: 300px;          /* 提示框宽度 */
+    height: 100px;         /* 提示框高度 */
+    border-radius: 20px;    /* 圆角大小 */
+    padding: 10px;         /* 内边距 */
+    
+    /* 内部布局 */
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-showCustomAlert.show {
+    display: flex;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.7);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* 🎯 单独调节按钮尺寸 - 修改这里的数字 */
+.custom-showCustomAlert button {
+    background: linear-gradient(135deg, #4a6fa5, #3a5f95);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    /* 按钮尺寸调节 */
+    width: 50px;          /* 按钮宽度 */
+    height: 50px;          /* 按钮高度 */
+    border-radius: 100px;    /* 按钮圆角 */
+    font-size: 0.8rem;     /* 按钮文字大小 */
+    margin-top: 15px;      /* 按钮上边距 */
+}
+
+.custom-showCustomAlert button:hover {
+    background: linear-gradient(135deg, #3a5f95, #2a4f85);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* 消息内容样式 */
+#alertMessage {
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    line-height: 1.2;
+}
+
+/* 遮罩层 */
+#overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+}
+
+
+
+
 #music-info {
     position: fixed;
     top: 15px;
@@ -875,6 +967,14 @@
     <i class="fas fa-yin-yang rotating-image" style="color: #4a6fa5; font-size: 40px; margin-right: 15px;"></i>
     修仙计算器
   </h1>
+<!-- 自定义提示框 -->
+<div id="customAlert" class="custom-showCustomAlert">
+    <div id="alertMessage"></div>
+    <button onclick="hideCustomAlert()">确定</button>
+</div>
+
+<!-- 遮罩层 -->
+<div id="overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;"></div>
 
   <div class="qq-group-section">
     <span>有没有吊大的进群带带我：371408377</span>
@@ -1064,8 +1164,8 @@
       <div id="dan-tab" class="tab-content">
         <!-- 修改后的吃丹计算器样式 -->
         <div class="dan-input-group">
-          <input type="number" id="dan-base-life" step="0.01" placeholder="输入生命" class="life-input">
-          <input type="number" id="dan-base-attack" step="0.01" placeholder="输入攻击" class="attack-input">
+          <input type="number" id="dan-base-life" step="0.01" placeholder="丹加的生命" class="life-input">
+          <input type="number" id="dan-base-attack" step="0.01" placeholder="丹加的攻击" class="attack-input">
           <select id="dan-base-unit">
             <option value="1" selected>个</option>
             <option value="10000">万</option>
@@ -1091,7 +1191,7 @@
         </div>
         
         <div class="dan-quantity-container">
-          <input type="number" id="dan-quantity" step="1" min="1" placeholder="输入丹数量">
+          <input type="number" id="dan-quantity" step="1" min="1" placeholder="输入要吃的丹数量">
         </div>
         
         <div class="bonus-container">
@@ -1129,7 +1229,7 @@
         </div>
         
         <div class="dan-bonus-container">
-          <div class="dan-bonus-title">吃丹：</div>
+          <div class="dan-bonus-title">吃丹收益：</div>
           <div class="dan-bonus-input">
             <input type="number" id="dan-bonus" step="0.01" placeholder="输入百分比">
           </div>
@@ -1599,6 +1699,39 @@
       });
     }
 
+
+// 显示自定义提示框
+function showCustomAlert(message, duration = 3000) {
+    const alertBox = document.getElementById('customAlert');
+    const overlay = document.getElementById('overlay');
+    const messageElement = document.getElementById('alertMessage');
+    
+    messageElement.innerHTML = message;
+    alertBox.classList.add('show');
+    overlay.style.display = 'block';
+    <!--  -->
+    <!-- // 自动关闭 -->
+    <!-- if (duration > 0) { -->
+        <!-- setTimeout(() => { -->
+            <!-- hideCustomAlert(); -->
+        <!-- }, duration); -->
+    <!-- } -->
+}
+
+// 隐藏自定义提示框
+function hideCustomAlert() {
+    const alertBox = document.getElementById('customAlert');
+    const overlay = document.getElementById('overlay');
+    
+    alertBox.classList.remove('show');
+    overlay.style.display = 'none';
+}
+
+<!-- // 点击遮罩层关闭 -->
+<!-- document.getElementById('overlay').addEventListener('click', hideCustomAlert); -->
+
+
+
     // 通过滑动切换标签页
     function switchTabBySwipe(direction) {
       let newTabIndex = currentTabIndex + direction;
@@ -1766,12 +1899,12 @@
       
       // 验证逻辑
       if (initial <= 0) {
-        alert("初始战力必须大于0");
+        showCustomAlert("初始战力必须大于0");
         return;
       }
       
       if (target <= initial) {
-        alert("目标战力必须大于初始战力");
+        showCustomAlert("目标战力必须大于初始战力");
         return;
       }
       
@@ -2033,11 +2166,11 @@
         if (successful) {
           showCopySuccess();
         } else {
-          alert('复制失败，请手动复制：' + text);
+          showCustomAlert('复制失败，请手动复制：' + text);
         }
       } catch (err) {
         document.body.removeChild(input);
-        alert('请手动复制QQ群号：' + text);
+        showCustomAlert('请手动复制QQ群号：' + text);
       }
     }
 
@@ -2216,7 +2349,7 @@
         gameOver = true;
         revealAllMines();
         clearInterval(timerInterval);
-        setTimeout(() => alert('游戏结束！你踩到了炸弹！'), 10);
+        setTimeout(() => showCustomAlert('游戏结束！你踩到了炸弹！'), 10);
       } else if (mineBoard[x][y] > 0) {
         let displayNumber = mineBoard[x][y];
         if (rows === 8) displayNumber = Math.min(displayNumber, 3);
@@ -2283,12 +2416,12 @@
         gameOver = true;
         clearInterval(timerInterval);
         revealAllMines();
-        setTimeout(() => alert('游戏结束！你的插旗位置有误！'), 10);
+        setTimeout(() => showCustomAlert('游戏结束！你的插旗位置有误！'), 10);
       } else {
         gameOver = true;
         clearInterval(timerInterval);
         revealAllCellsExceptFlags();
-        setTimeout(() => alert('恭喜你赢了！所有炸弹都被正确标记！'), 10);
+        setTimeout(() => showCustomAlert('恭喜你赢了！所有炸弹都被正确标记！'), 10);
       }
     }
 
@@ -2298,7 +2431,7 @@
         gameOver = true;
         clearInterval(timerInterval);
         revealAllCellsExceptFlags();
-        setTimeout(() => alert('恭喜你赢了！'), 10);
+        setTimeout(() => showCustomAlert('恭喜你赢了！'), 10);
       }
       
       if (!gameOver) {
@@ -2318,7 +2451,7 @@
           gameOver = true;
           clearInterval(timerInterval);
           revealAllCellsExceptFlags();
-          setTimeout(() => alert('恭喜你赢了！所有炸弹都被正确标记！'), 10);
+          setTimeout(() => showCustomAlert('恭喜你赢了！所有炸弹都被正确标记！'), 10);
         }
       }
     }
