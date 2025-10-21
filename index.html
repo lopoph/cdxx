@@ -94,6 +94,16 @@
     z-index: 9999;
     backdrop-filter: blur(5px);
 }
+/* 结果面板的滚动动画 */
+.result-section {
+    transition: all 0.5s ease;
+    scroll-margin-top: 20px; /* 滚动时的偏移量 */
+}
+
+/* 确保页面有平滑滚动 */
+html {
+    scroll-behavior: smooth;
+}
 
 
 
@@ -1472,6 +1482,37 @@
   </div>
 
   <script>
+// 增强版自动滚动函数
+function scrollToResult() {
+    // 稍微延迟一下，确保结果面板已经显示
+    setTimeout(() => {
+        const resultSections = document.querySelectorAll('.result-section:not(.hidden)');
+        if (resultSections.length > 0) {
+            const resultSection = resultSections[0];
+            
+            // 计算需要滚动的位置（结果面板顶部往上50像素，让内容更可见）
+            const elementPosition = resultSection.getBoundingClientRect().top + window.pageYOffset;
+            const offsetPosition = elementPosition - 100;
+            
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+            
+            // 添加高亮效果
+            resultSection.style.transition = 'all 0.5s ease';
+            resultSection.style.transform = 'translateY(-5px)';
+            resultSection.style.boxShadow = '0 10px 30px rgba(74, 111, 165, 0.3)';
+            
+            setTimeout(() => {
+                resultSection.style.transform = 'translateY(0)';
+                resultSection.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)';
+            }, 800);
+        }
+    }, 100);
+}
+
+  
     // ===== 完整音乐播放器 =====
     const musicPlayer = (function() {
         // 音乐库
@@ -1849,6 +1890,9 @@ function hideCustomAlert() {
       document.getElementById('bath-result-section').classList.add('hidden');
       document.getElementById('dan-result-section').classList.add('hidden');
       document.getElementById('dan-reverse-result-section').classList.add('hidden');
+      
+      // 🎯 新增：自动滚动到结果
+    scrollToResult();
     }
 
     // 基础反推函数
@@ -1884,6 +1928,8 @@ function hideCustomAlert() {
       document.getElementById('bath-result-section').classList.add('hidden');
       document.getElementById('dan-result-section').classList.add('hidden');
       document.getElementById('dan-reverse-result-section').classList.add('hidden');
+      // 🎯 新增：自动滚动到结果
+    scrollToResult();
     }
 
     // 泡澡计算函数
@@ -1955,6 +2001,8 @@ function hideCustomAlert() {
       document.getElementById('base-result-section').classList.add('hidden');
       document.getElementById('dan-result-section').classList.add('hidden');
       document.getElementById('dan-reverse-result-section').classList.add('hidden');
+      // 🎯 新增：自动滚动到结果
+    scrollToResult();
     }
 
     // 提升数值同步函数
@@ -2083,6 +2131,9 @@ function hideCustomAlert() {
       document.getElementById('base-result-section').classList.add('hidden');
       document.getElementById('bath-result-section').classList.add('hidden');
       document.getElementById('dan-reverse-result-section').classList.add('hidden');
+      
+      // 🎯 新增：自动滚动到结果
+    scrollToResult();
     }
 
     // 反推丹药数量函数
@@ -2144,6 +2195,9 @@ function hideCustomAlert() {
       document.getElementById('base-result-section').classList.add('hidden');
       document.getElementById('bath-result-section').classList.add('hidden');
       document.getElementById('dan-result-section').classList.add('hidden');
+      
+      // 🎯 新增：自动滚动到结果
+    scrollToResult();
     }
 
     // QQ群复制功能
